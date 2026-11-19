@@ -29,7 +29,9 @@ is the **3004** line and must not be modified as part of work in this repo.
 - Release notes: `updates/3006_102.9_1-gnuton1_note.txt` (dots in the version are
   kept; the first dot after `3006` becomes an underscore).
 - Do not copy 3004 manifests or release notes into this repository.
-- `updates/**`, `**/*.md` and `[SKIP_CI]` commits must not trigger firmware builds.
+- Pushes that only touch `updates/**` or Markdown files do not trigger builds
+  (`paths-ignore`). `[SKIP_CI]` in the manifest commit message is a convention
+  only; the workflow does not parse it.
 
 ## Architecture & Structure
 - `release/src/`: Main source tree for the firmware.
@@ -61,6 +63,9 @@ Run from `release/src-rt-5.04behnd.4916/` (the SDK tree used by the BE models):
   do not reintroduce repository-name-specific paths such as
   `/home/runner/work/asuswrt-merlin.ng/...`.
 - `workflow_dispatch` accepts a `model` input; leave it empty to build all models.
+- `release-job` and `manifest-job` run only for tag **push** events, never for a
+  manual `workflow_dispatch` on a tag. The manifest job also waits for the
+  release job, so the feed is not updated if release creation fails.
 - The manifest job only advertises models whose default artifact exists in the
   tag's build, and updates `updates/manifest_3006.txt` idempotently.
 

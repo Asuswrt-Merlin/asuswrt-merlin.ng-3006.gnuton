@@ -17,7 +17,7 @@ on:
         type: string
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -243,7 +243,9 @@ jobs:
       name: Publish
       needs: build-job
       runs-on: ubuntu-24.04
-      if: startsWith(github.event.ref, 'refs/tags/')
+      if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
+      permissions:
+        contents: write
       steps:
         - name: Download packages
           uses: actions/download-artifact@v8
@@ -265,9 +267,11 @@ jobs:
     
     manifest-job:
       name: Publish Manifest
-      needs: build-job
+      needs: [build-job, release-job]
       runs-on: ubuntu-24.04
-      if: startsWith(github.event.ref, 'refs/tags/') && !contains(github.event.ref, 'alpha') && !contains(github.event.ref, 'beta')
+      if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') && !contains(github.ref, 'alpha') && !contains(github.ref, 'beta')
+      permissions:
+        contents: write
       steps:
         - uses: actions/checkout@v7
           with:
@@ -328,6 +332,9 @@ jobs:
             fi
 
             cp "${CHANGELOG_FILE}" "${UPDATE_DIR}/${RELEASE_NOTE_FILE}"
+            # Feed notes should end with exactly one newline so feed commits
+            # stay free of "new blank line at EOF" warnings.
+            perl -0pi -e 's/\n+\z/\n/' "${UPDATE_DIR}/${RELEASE_NOTE_FILE}"
             echo "Uploading ${MANIFEST} and ${RELEASE_NOTE_FILE}"
             git add "${UPDATE_DIR}"
             if git diff --cached --quiet; then

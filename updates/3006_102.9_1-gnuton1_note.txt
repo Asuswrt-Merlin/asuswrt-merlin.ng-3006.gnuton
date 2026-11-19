@@ -21,5 +21,3 @@ Release: 3006.102.9_1-gnuton1
           available on them.
   - NOTE: Owners of the RT-BE82U should use the RT-BE82M firmware
           instead.
-
-
