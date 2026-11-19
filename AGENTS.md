@@ -2,7 +2,7 @@
 
 This repository is the **3006 firmware line** of GNUton's AsusWrt-Merlin.ng
 fork. It is self-contained: sources, CI, the firmware update feed and releases
-all live here. The older `Asuswrt-Merlin/asuswrt-merlin.ng-gnuton` repository
+all live here. The older `Asuswrt-Merlin/asuswrt-merlin.ng-3004.gnuton` repository
 is the **3004** line and must not be modified as part of work in this repo.
 
 ## Git Workflow & Branches
@@ -19,7 +19,7 @@ is the **3004** line and must not be modified as part of work in this repo.
 - `rt-be82m` (RT-BE82M)
 
 3004/WiFi 6 models are supported by the separate
-`Asuswrt-Merlin/asuswrt-merlin.ng-gnuton` repository, not here.
+`Asuswrt-Merlin/asuswrt-merlin.ng-3004.gnuton` repository, not here.
 
 ## Firmware Update Feed
 - Feed URL used by `release/src/router/rom/webs_scripts/merlin_webs_update.sh`:
