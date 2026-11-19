@@ -10,7 +10,7 @@ repository.
 
 > **Looking for 3004 / WiFi 6 builds?**
 > They live in
-> [Asuswrt-Merlin/asuswrt-merlin.ng-gnuton](https://github.com/Asuswrt-Merlin/asuswrt-merlin.ng-gnuton).
+> [Asuswrt-Merlin/asuswrt-merlin.ng-3004.gnuton](https://github.com/Asuswrt-Merlin/asuswrt-merlin.ng-3004.gnuton).
 > This repository builds the 3006 line only and rejects non-`3006.*` tags.
 
 ## Supported models
