@@ -279,10 +279,21 @@ jobs:
 
             # One entry per downloaded image. model/variant come from the build
             # matrix, so the packaging name (asset) and the theme (ui) always
-            # match the artifact directory that produced the file.
-            while IFS=$'\t' read -r model ui asset; do
+            # match the artifact directory that produced the file. Every
+            # non-skipped matrix entry must contribute an artifact directory
+            # with at least one firmware image.
+            while IFS=$'\t' read -r model ui asset skip; do
               dir="release-${model}-${ui}"
-              [ -d "${dir}" ] || continue
+              if [ "${skip}" = "true" ]; then
+                echo "Skipping ${asset}/${ui}: matrix entry is marked skip."
+                continue
+              fi
+              if [ ! -d "${dir}" ]; then
+                echo "::error::Missing artifact directory ${dir} for ${asset}/${ui}."
+                exit 1
+              fi
+
+              image_count=0
               for f in "${dir}"/*; do
                 [ -f "${f}" ] || continue
                 file="$(basename "${f}")"
@@ -293,6 +304,8 @@ jobs:
                   pkgtb|w|trx|bin|img|chk) ;;
                   *) continue ;;
                 esac
+
+                image_count=$((image_count + 1))
 
                 key="${asset}|${ui}"
                 if [ -n "${seen[$key]:-}" ]; then
@@ -326,7 +339,12 @@ jobs:
                   '{model: $model, variant: $variant, file: $file, size: $size, md5: $md5, sha256: $sha256}')")
                 printf '%s  %s\n' "${sha256}" "${file}" >> "${SHA256SUMS}.tmp"
               done
-            done < <(jq -r '.include[].cfg | [.model, .ui, .asset] | @tsv' <<< "${MATRIX}")
+
+              if [ "${image_count}" -eq 0 ]; then
+                echo "::error::No firmware image found in ${dir} for ${asset}/${ui}."
+                exit 1
+              fi
+            done < <(jq -r '.include[].cfg | [.model, .ui, .asset, .skip] | @tsv' <<< "${MATRIX}")
 
             if [ "${#entries[@]}" -eq 0 ]; then
               echo "::error::No firmware images found in the downloaded release artifacts."
