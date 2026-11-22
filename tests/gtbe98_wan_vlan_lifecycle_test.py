@@ -108,9 +108,36 @@ static int switch_ioctl(int fd, unsigned long cmd, int *arg) { assert(fd==42); s
 '''
 code+=function('release/src/router/shared/sysdeps/broadcom/rtkswitch.c','int rtkswitch_ioctl(int val, int val2, int val3, int val4, int val5)')+'\n'
 code+='\n#undef open\n#undef close\n#undef ioctl\n'
+code += r'''
+#include <net/if.h>
+static int parent_mtu, mtu_reads, mtu_writes, fail_read, fail_write;
+static int mtu_ioctl(int fd, unsigned long op, struct ifreq *ifr) {
+ assert(fd == 42 && !strcmp(ifr->ifr_name, "eth1"));
+ if (op == SIOCGIFMTU) {
+  ++mtu_reads;
+  if (fail_read) return -1;
+  ifr->ifr_mtu = parent_mtu;
+ } else {
+  assert(op == SIOCSIFMTU);
+  ++mtu_writes;
+  if (fail_write) return -1;
+  parent_mtu = ifr->ifr_mtu;
+ }
+ return 0;
+}
+#define ioctl mtu_ioctl
+#define strlcpy(dst,src,n) snprintf(dst,n,"%s",src)
+'''
+code += function('release/src/router/rc/wan.c', 'static int ensure_parent_mtu(') + '\n'
+code += '#undef ioctl\n#undef strlcpy\n'
 code+=r'''
 int main(void) {
  unsigned int i, commands[]={10,11,12,13,36,37,38,39,380,3901,3951,3952,3953};
+ parent_mtu=9000; assert(!ensure_parent_mtu(42,"eth1",1508) && !mtu_writes && parent_mtu==9000);
+ parent_mtu=1500; assert(!ensure_parent_mtu(42,"eth1",1508) && mtu_writes==1 && parent_mtu==1508);
+ assert(!ensure_parent_mtu(42,"eth1",1508) && mtu_writes==1);
+ fail_read=1; assert(ensure_parent_mtu(42,"eth1",1510)<0 && mtu_writes==1);
+ fail_read=0; fail_write=1; assert(ensure_parent_mtu(42,"eth1",1510)<0 && parent_mtu==1508 && mtu_reads==5);
  for(i=0;i<sizeof(commands)/sizeof(commands[0]);++i) {
   assert(!rtkswitch_ioctl(commands[i],0x28,0,0,0));
   assert(_IOC_TYPE(sent_ioctl)=='R' && _IOC_DIR(sent_ioctl)==_IOC_NONE);

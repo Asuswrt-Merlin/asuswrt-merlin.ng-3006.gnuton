@@ -1243,6 +1243,21 @@ void restore_wan_ebtables_rules()
 #endif
 }
 
+/* A VLAN parent can also carry LAN traffic with a larger MTU. */
+static int ensure_parent_mtu(int fd, const char *ifname, int minimum)
+{
+	struct ifreq ifr;
+
+	memset(&ifr, 0, sizeof(ifr));
+	strlcpy(ifr.ifr_name, ifname, sizeof(ifr.ifr_name));
+	if (ioctl(fd, SIOCGIFMTU, &ifr) < 0)
+		return -1;
+	if (ifr.ifr_mtu >= minimum)
+		return 0;
+	ifr.ifr_mtu = minimum;
+	return ioctl(fd, SIOCSIFMTU, &ifr);
+}
+
 void
 start_wan_if(int unit)
 {
@@ -2100,14 +2115,10 @@ TRACE_PT("3g begin with %s.\n", wan_ifname);
 						/* First set parent device if vlan was configured */
 						strncpy(ifv.device1, wan_ifname, IFNAMSIZ);
 						ifv.cmd = GET_VLAN_REALDEV_NAME_CMD;
-						if (ioctl(s, SIOCGIFVLAN, &ifv) >= 0) {
-							strncpy(ifr.ifr_name, ifv.u.device2, IFNAMSIZ);
-							ifr.ifr_mtu = mtu + 8;
-							if (ioctl(s, SIOCSIFMTU, &ifr)) {
-								perror(wan_ifname);
-								logmessage("start_wan_if()", "Error setting MTU on %s to %d", ifv.u.device2, mtu);
-							}
-						}
+						if (ioctl(s, SIOCGIFVLAN, &ifv) >= 0 &&
+						    ensure_parent_mtu(s, ifv.u.device2, mtu + 8) < 0)
+							logmessage("start_wan_if()", "Cannot ensure MTU of at least %d on %s: %s",
+								mtu + 8, ifv.u.device2, strerror(errno));
 
 						/* Set WAN device */
 						strncpy(ifr.ifr_name, wan_ifname, IFNAMSIZ);
