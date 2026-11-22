@@ -34,7 +34,9 @@ static int load_plan(struct gtbe98_vlan_plan *plan)
 	r.single_wan = r.single_wan && nvram_match("wans_usb_bk", "0") && nvram_match("wans_usb_bk_act", "0");
 #endif
 	r.extwan = !strcmp(extwan, "0") ? 0 : !strcmp(extwan, "1") ? 1 : -1;
+#ifdef RTCONFIG_BONDING_WAN
 	r.wan_aggregation = !nvram_match("bond_wan", "0");
+#endif
 	/* Reject configured multi-LAN VLANs conservatively, including inactive
 	 * definitions. Their ownership is not part of this first implementation.
 	 */

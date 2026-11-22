@@ -8,11 +8,13 @@ trap 'rm -rf "$work"' EXIT HUP INT TERM
 	"$repo/release/src/router/shared/gtbe98_wan_vlan.c" \
 	"$repo/tests/gtbe98_wan_vlan_test.c" -o "$work/test"
 "$work/test"
-"${CC:-cc}" -std=gnu89 -Wall -Wextra -Werror -pedantic \
-	-I"$repo/release/src/router/shared" \
-	"$repo/release/src/router/shared/gtbe98_wan_vlan.c" \
-	"$repo/tests/gtbe98_wan_vlan_http_test.c" -o "$work/http-test"
-"$work/http-test"
+for bonding in "" -DRTCONFIG_BONDING_WAN; do
+	"${CC:-cc}" $bonding -std=gnu89 -Wall -Wextra -Werror -pedantic \
+		-I"$repo/release/src/router/shared" \
+		"$repo/release/src/router/shared/gtbe98_wan_vlan.c" \
+		"$repo/tests/gtbe98_wan_vlan_http_test.c" -o "$work/http-test"
+	"$work/http-test"
+done
 node "$repo/tests/gtbe98_wan_vlan_ui_test.js"
 python3 "$repo/tests/gtbe98_wan_vlan_http_integration.py"
 "${CC:-cc}" -std=gnu99 -Wall -Wextra -Werror \

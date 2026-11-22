@@ -10,8 +10,8 @@ const end = source.indexOf('\nif(wan_bonding_support)', begin);
 assert(begin > 0 && end > begin);
 const validator = source.substring(begin, end);
 function context() {
-    const state = { autowan_enable: '0', wans_dualwan: 'wan none', wans_standby: '0', wans_usb_bk: '0', wans_usb_bk_act: '0', bond_wan: '0', vlan_enable: '0', vlan_rl: '' };
-    const result = { gtbe98_vlan_model: true, gtbe98_vlan_cap: true, original_switch_wantag: 'none', original_switch_stb_x: '0', reboot_confirm: 0,
+    const state = { autowan_enable: '0', wans_dualwan: 'wan none', wans_standby: '0', wans_usb_bk: '0', wans_usb_bk_act: '0', vlan_enable: '0', vlan_rl: '' };
+    const result = { wan_bonding_support: false, gtbe98_vlan_model: true, gtbe98_vlan_cap: true, original_switch_wantag: 'none', original_switch_stb_x: '0', reboot_confirm: 0,
         gtbe98_vlan_original: { enable: '0', vid: '835', priority: '0' },
         document: { form: { wan_dot1q: { value: '1' }, wan_vid: { value: '835' }, wan_dot1p: { value: '0' } } },
         httpApi: { nvramGet: () => state }, messages: [], state };
@@ -21,7 +21,12 @@ function context() {
     return result;
 }
 let c = context();
+c.document.form.bond_wan_radio = { value: '' };
 assert(c.gtbe98_vlan_validate()); assert.equal(c.reboot_confirm, 1);
+c.wan_bonding_support = true; c.state.bond_wan = '1';
+assert(!c.gtbe98_vlan_validate());
+c.state.bond_wan = '0'; c.document.form.bond_wan_radio.value = '1';
+assert(!c.gtbe98_vlan_validate());
 for (const vid of ['0', '1', '2', '4094', '4095', '-1', '835x', '835 ', '']) {
     c = context(); c.document.form.wan_vid.value = vid; assert(!c.gtbe98_vlan_validate());
 }
@@ -33,7 +38,7 @@ for (const priority of ['8', '-1', '00', '0 ', '']) {
 }
 c = context(); c.original_switch_wantag = 'manual'; assert(!c.gtbe98_vlan_validate());
 assert.equal(c.original_switch_wantag, 'manual'); assert(c.messages[0].includes('not migrated automatically'));
-for (const [key, value] of Object.entries({ autowan_enable: '1', wans_dualwan: 'wan usb', wans_standby: '1', wans_usb_bk: '1', wans_usb_bk_act: '1', bond_wan: '1', vlan_enable: '1', vlan_rl: '<1>10' })) {
+for (const [key, value] of Object.entries({ autowan_enable: '1', wans_dualwan: 'wan usb', wans_standby: '1', wans_usb_bk: '1', wans_usb_bk_act: '1', vlan_enable: '1', vlan_rl: '<1>10' })) {
     c = context(); c.state[key] = value; assert(!c.gtbe98_vlan_validate());
 }
 c = context(); c.gtbe98_vlan_cap = false; assert(!c.gtbe98_vlan_validate()); assert.equal(c.reboot_confirm, 0);

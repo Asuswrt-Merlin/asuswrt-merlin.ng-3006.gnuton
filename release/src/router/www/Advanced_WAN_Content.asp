@@ -156,11 +156,14 @@ function gtbe98_vlan_validate() {
 			alert("First disable the IPTV ISP profile and STB port on LAN > IPTV. The existing ISP VLAN is not migrated automatically; then enter it here.");
 			return false;
 		}
-		var state = httpApi.nvramGet(["autowan_enable", "wans_dualwan", "wans_standby", "wans_usb_bk", "wans_usb_bk_act", "bond_wan", "vlan_enable", "vlan_rl"]);
+		var keys = ["autowan_enable", "wans_dualwan", "wans_standby", "wans_usb_bk", "wans_usb_bk_act", "vlan_enable", "vlan_rl"];
+		if (wan_bonding_support) keys.push("bond_wan");
+		var state = httpApi.nvramGet(keys);
 		if (state.autowan_enable != "0" || state.wans_dualwan != "wan none" || state.wans_standby != "0" ||
 		    state.wans_usb_bk != "0" || state.wans_usb_bk_act != "0" ||
-		    state.bond_wan != "0" || state.vlan_enable != "0" || state.vlan_rl != "" ||
-		    (document.form.bond_wan_radio && document.form.bond_wan_radio.value != "0")) {
+		    state.vlan_enable != "0" || state.vlan_rl != "" ||
+		    (wan_bonding_support && (state.bond_wan != "0" ||
+		     (document.form.bond_wan_radio && document.form.bond_wan_radio.value != "0")))) {
 			alert("WAN VLAN requires one manually selected WAN. Disable AutoWAN, Dual WAN, USB backup/standby, WAN aggregation and LAN VLAN configuration first.");
 			return false;
 		}

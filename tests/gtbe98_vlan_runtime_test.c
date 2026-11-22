@@ -227,7 +227,7 @@ static void reset(int extwan)
 	nvram_set("autowan_enable", "0"); nvram_set("wans_dualwan", "wan none");
 	nvram_set("wans_standby", "0"); nvram_set_int("wans_extwan", extwan);
 	nvram_set("wans_usb_bk", "0"); nvram_set("wans_usb_bk_act", "0");
-	nvram_set("bond_wan", "0"); nvram_set("vlan_enable", "0"); nvram_set("lan_ifname", "br0");
+	nvram_set("vlan_enable", "0"); nvram_set("lan_ifname", "br0");
 	nvram_set("gtbe98_wan_vlan_cap", "1");
 }
 int main(void)

@@ -55,7 +55,9 @@ static void reset(void)
 	put(&config, "wans_usb_bk", "0");
 	put(&config, "wans_usb_bk_act", "0");
 	put(&config, "wans_extwan", "1");
+#ifdef RTCONFIG_BONDING_WAN
 	put(&config, "bond_wan", "0");
+#endif
 	put(&config, "vlan_enable", "0");
 	put(&config, "gtbe98_wan_vlan_cap", "1");
 	put(&post, "wan0_dot1q", "1");
@@ -64,10 +66,16 @@ static void reset(void)
 int main(void)
 {
 	const char *invalid[] = { "0", "1", "2", "4094", "4095", "-1", "835 ", "835x", "99999999999999", "" };
-	const char *mode_keys[] = { "sw_mode", "autowan_enable", "wans_dualwan", "bond_wan", "vlan_enable", "vlan_rl", "wans_standby" };
-	const char *mode_values[] = { "2", "1", "wan usb", "1", "1", "<1>10", "1" };
+	const char *mode_keys[] = { "sw_mode", "autowan_enable", "wans_dualwan", "vlan_enable", "vlan_rl", "wans_standby" };
+	const char *mode_values[] = { "2", "1", "wan usb", "1", "<1>10", "1" };
 	unsigned int i;
 	reset(); assert(!gtbe98_http_preflight(NULL));
+	put(&post, "bond_wan", "1");
+#ifdef RTCONFIG_BONDING_WAN
+	assert(gtbe98_http_preflight(NULL));
+#else
+	assert(!gtbe98_http_preflight(NULL));
+#endif
 	reset(); put(&post, "action_script", "restart_wan"); assert(gtbe98_http_preflight(NULL));
 	reset(); put(&post, "rc_service", "reboot"); assert(!gtbe98_http_preflight(&post));
 	reset(); assert(gtbe98_http_preflight(&post)); /* JSON ignores action_script. */

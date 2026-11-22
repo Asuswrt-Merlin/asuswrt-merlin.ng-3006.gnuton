@@ -56,7 +56,10 @@ static const char *gtbe98_http_preflight(json_object *root)
 {
 	static const char *fields[] = { "dot1q", "vid", "dot1p" };
 	static const char *topology[] = { "sw_mode", "autowan_enable", "wans_dualwan",
-		"wans_extwan", "bond_wan", "vlan_enable", "vlan_rl", "wans_standby",
+#ifdef RTCONFIG_BONDING_WAN
+		"bond_wan",
+#endif
+		"wans_extwan", "vlan_enable", "vlan_rl", "wans_standby",
 #ifdef RTCONFIG_USB_WAN_BACKUP
 		"wans_usb_bk", "wans_usb_bk_act",
 #endif
@@ -142,7 +145,9 @@ static const char *gtbe98_http_preflight(json_object *root)
 #endif
 	value = gtbe98_http_value(root, "wans_extwan");
 	request.extwan = !strcmp(value, "0") ? 0 : !strcmp(value, "1") ? 1 : -1;
+#ifdef RTCONFIG_BONDING_WAN
 	request.wan_aggregation = strcmp(gtbe98_http_value(root, "bond_wan"), "0") != 0;
+#endif
 	request.lan_vlan_state = (*gtbe98_http_value(root, "vlan_rl") ||
 		strcmp(gtbe98_http_value(root, "vlan_enable"), "0")) ? 1 : 0;
 	result = gtbe98_wan_vlan_plan(&request, &plan);
