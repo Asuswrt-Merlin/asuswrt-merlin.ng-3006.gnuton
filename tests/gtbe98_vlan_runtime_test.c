@@ -2,6 +2,7 @@
 /* Execute the actual rc backend with local files and simulated devices. */
 #define _GNU_SOURCE
 #define __RC_H__
+#define RTCONFIG_AMAS
 #define RTCONFIG_USB_WAN_BACKUP
 #include <assert.h>
 #include <errno.h>
@@ -248,6 +249,9 @@ int main(void)
 	assert(!strstr(nvram_safe_get("lan_ifnames"), "vlan4094"));
 	nvram_set("lan_ifnames", "eth0 eth1 bond0 wl0 wl1 wl2 wl3");
 	assert(gtbe98_vlan_configure() == 0 && !up_commands);
+	assert(nvram_match("eth_ifnames", "eth0") && nvram_match("amas_ethif_type", "32"));
+	assert(nvram_match("eth_priority", "0 1 1") && nvram_match("wired_ifnames", "eth0 eth1 eth2 eth3"));
+	assert(nvram_match("amas_lldp_ifnames", "eth0 eth3") && nvram_match("amas_lldp_iftypes", "32 32"));
 	assert(strstr(nvram_safe_get("lan_ifnames"), "bond0"));
 	assert(gtbe98_vlan_wan_start(nvram_safe_get("wan0_ifname")) == 0 && up_commands == 1);
 	commands = programming;

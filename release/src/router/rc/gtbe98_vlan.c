@@ -404,9 +404,19 @@ int gtbe98_vlan_configure(void)
 			goto out;
 		}
 	}
-	/* init_switch() has already run config_lacp() during boot. Publish only
-	 * WAN fields here; rebuilding lan_ifnames would drop its bond0 mapping.
-	 */
+#ifdef RTCONFIG_AMAS
+	/* LAN/WAN1 is now dedicated to the ISP. eth0 is available to AiMesh
+	 * as a 10G LAN port, and the legacy vlan4094 no longer exists. */
+	if (plan.program_switch) {
+		nvram_set("eth_ifnames", "eth0");
+		nvram_set("amas_ethif_type", "32");
+		nvram_set("eth_priority", "0 1 1");
+		nvram_set("wired_ifnames", "eth0 eth1 eth2 eth3");
+		nvram_set("amas_lldp_ifnames", "eth0 eth3");
+		nvram_set("amas_lldp_iftypes", "32 32");
+	}
+#endif
+	/* Preserve the LAN bridge membership already set by config_lacp(). */
 	nvram_set("wan_ifname", plan.ifname);
 	set_wan_phy(plan.ifname);
 	nvram_set("wan0_ifname", plan.ifname);

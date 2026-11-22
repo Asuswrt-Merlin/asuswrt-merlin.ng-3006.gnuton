@@ -204,10 +204,47 @@ static int mtu_ioctl(int fd, unsigned long op, struct ifreq *ifr) {
 '''
 code += function('release/src/router/rc/wan.c', 'static int ensure_parent_mtu(') + '\n'
 code += '#undef ioctl\n#undef strlcpy\n'
+# Run the discovery list generator with stale AutoWAN candidates, as after an upgrade.
+shutils = (ROOT / 'release/src/router/shared/shutils.h').read_text()
+start = shutils.index('#define foreach(word, wordlist, next)')
+code += shutils[start:shutils.index('\n#endif', start)] + '\n'
+code += r'''
+#define RTCONFIG_AUTO_WANPORT
+#define is_router_mode() 1
+#define re_mode() 0
+#define is_auto_wanport_enabled() 0
+#define _dprintf(...) ((void)0)
+#define strlcpy(dst,src,n) snprintf(dst,n,"%s",src)
+static int mesh_configured;
+static char *mesh_lan = "eth0 eth1 bond0 wl0";
+static int mesh_int(const char *key) {
+ if (!strcmp(key,"x_Setting")) return mesh_configured;
+ assert(!strcmp(key,"re_mode")); return 0;
+}
+static char *mesh_get(const char *key) {
+ if (!strcmp(key,"wan0_ifname")) return "vlan835";
+ if (!strcmp(key,"wans_cap")) return "wan lan";
+ if (!strcmp(key,"eth_ifnames") || !strcmp(key,"autowan_ifnames")) return "eth0 vlan4094";
+ if (!strcmp(key,"lan_ifnames")) return mesh_lan;
+ assert(!strcmp(key,"autowan_detected_ifname")); return "";
+}
+#define nvram_safe_get mesh_get
+#define nvram_get_int mesh_int
+'''
+for signature in ('static int amas_lldp_lan_only(', 'void gen_lldpd_if('):
+    code += function('release/src/router/rc/services.c', signature) + '\n'
+code += '#undef nvram_safe_get\n#undef nvram_get_int\n#undef strlcpy\n'
 code+=r'''
 int main(void) {
  unsigned int i, commands[]={10,11,12,13,36,37,38,39,380,3901,3951,3952,3953};
+ char bind[256]={0};
  test_leds();
+ gen_lldpd_if(bind); assert(!strcmp(bind,"vlan835,eth0,vlan4094"));
+ dot1q="1"; gen_lldpd_if(bind); assert(!strcmp(bind,"eth0,eth1,bond0,wl0"));
+ mesh_configured=1; gen_lldpd_if(bind); assert(!strcmp(bind,"eth0,eth1,bond0,wl0"));
+ mesh_lan="eth1 eth2 eth3 wl0"; gen_lldpd_if(bind); assert(!strcmp(bind,"eth1,eth2,eth3,wl0"));
+ dot1q="0"; owned="1"; gen_lldpd_if(bind); assert(!strcmp(bind,"eth1,eth2,eth3,wl0"));
+ owned="0";
  parent_mtu=9000; assert(!ensure_parent_mtu(42,"eth1",1508) && !mtu_writes && parent_mtu==9000);
  parent_mtu=1500; assert(!ensure_parent_mtu(42,"eth1",1508) && mtu_writes==1 && parent_mtu==1508);
  assert(!ensure_parent_mtu(42,"eth1",1508) && mtu_writes==1);

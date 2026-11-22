@@ -22888,10 +22888,22 @@ void stop_amas_lanctrl(void)
 	killall("amas_lanctrl", SIGTERM);
 }
 
+/* Explicit WAN tagging dedicates the ISP VLAN to the WAN client.
+ * AiMesh discovery must follow LAN membership, including during onboarding. */
+static int amas_lldp_lan_only(void)
+{
+#ifdef GTBE98
+	return is_router_mode() && !re_mode() && gtbe98_vlan_requested();
+#else
+	return 0;
+#endif
+}
+
 void gen_lldpd_if(char *bind_ifnames)
 {
 	char word[64], *next = NULL;
 	int i = 0;
+	int lan_only = amas_lldp_lan_only();
 #ifdef HND_ROUTER
 	char *lacp_ifs = nvram_get_int("lacp_enabled")?nvram_safe_get("lacp_ifnames"):NULL;
 #endif
@@ -22910,7 +22922,7 @@ void gen_lldpd_if(char *bind_ifnames)
 #endif
 	/* prepare binding interface list */
 
-	if (nvram_get_int("x_Setting") == 0)
+	if (!lan_only && nvram_get_int("x_Setting") == 0)
 	{
 		//skip no wan port model
 		if( !strstr(nvram_safe_get("wans_cap"), "wan"))
@@ -23000,6 +23012,7 @@ void gen_lldpd_if(char *bind_ifnames)
 		{
 #if defined(RTCONFIG_AUTO_WANPORT) && !defined(RTCONFIG_BCM_MFG)
 			char autowan_detected_if[32];
+			char *autowan_ifnames = lan_only ? "" : nvram_safe_get("autowan_ifnames");
 
 			strlcpy(autowan_detected_if, nvram_safe_get("autowan_detected_ifname"), sizeof(autowan_detected_if));
 #endif
@@ -23007,7 +23020,7 @@ void gen_lldpd_if(char *bind_ifnames)
 			/* for lan_ifnames */
 			foreach (word, nvram_safe_get("lan_ifnames"), next) {
 #if defined(RTCONFIG_AUTO_WANPORT) && !defined(RTCONFIG_BCM_MFG)
-				if(strstr(nvram_safe_get("autowan_ifnames"), word)){
+				if(strstr(autowan_ifnames, word)){
 					_dprintf("%s: skip binding interface %s for lldpd\n", __func__, word);
 					continue;
 				}
@@ -23034,7 +23047,7 @@ void gen_lldpd_if(char *bind_ifnames)
 			}
 
 #if defined(RTCONFIG_AUTO_WANPORT) && !defined(RTCONFIG_BCM_MFG)
-			foreach (word, nvram_safe_get("autowan_ifnames"), next) {
+			foreach (word, autowan_ifnames, next) {
 				if(is_auto_wanport_enabled() == 2 && !strcmp(autowan_detected_if, word)){
 					_dprintf("%s: skip binding interface %s for lldpd\n", __func__, word);
 					continue;
@@ -23262,7 +23275,7 @@ void start_amas_lldpd(void)
 	} else
 	{
 		fprintf(fp, "amas-utils-cli set cost -v %d\n", nvram_get_int("cfg_cost"));
-		if(!nvram_get_int("x_Setting"))
+		if (!amas_lldp_lan_only() && !nvram_get_int("x_Setting"))
 		{
 			strlcpy(ifnames, nvram_safe_get("eth_ifnames"), sizeof(ifnames));
 			isWan = 1;
