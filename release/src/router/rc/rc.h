@@ -22,7 +22,7 @@
 extern int gtbe98_vlan_requested(void);
 extern void gtbe98_vlan_driver_init(void);
 extern int gtbe98_vlan_configure(void);
-extern int gtbe98_vlan_wan_start(void);
+extern int gtbe98_vlan_wan_start(const char *ifname);
 extern void gtbe98_vlan_reset(void);
 extern int gtbe98_vlan_reconfig_ifnames(void);
 #endif
@@ -1839,7 +1839,7 @@ extern int ppp_linkunit(char *linkname);
 // pppd.c
 extern char *ppp_escape(char *src, char *buf, size_t size);
 extern char *ppp_safe_escape(char *src, char *buf, size_t size);
-extern int start_pppd(int unit);
+extern int start_pppd(int unit, const char *link_ifname);
 extern void stop_pppd(int unit);
 extern int start_demand_ppp(int unit, int wait);
 extern int start_pppoe_relay(char *wan_if);

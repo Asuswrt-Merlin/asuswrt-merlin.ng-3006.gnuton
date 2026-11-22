@@ -422,7 +422,7 @@ out:
 	return ret;
 }
 
-int gtbe98_vlan_wan_start(void)
+int gtbe98_vlan_wan_start(const char *ifname)
 {
 	struct gtbe98_vlan_plan plan, owned;
 	struct vlan_context *c = NULL;
@@ -432,7 +432,8 @@ int gtbe98_vlan_wan_start(void)
 	if (fd < 0)
 		return -1;
 	if (load_plan(&plan) != GTBE98_VLAN_OK || read_owner(&owned, &index) ||
-	    !same_plan(&plan, &owned) || !linux_matches(&plan, index, 0))
+	    !same_plan(&plan, &owned) || strcmp(ifname, plan.ifname) ||
+	    !linux_matches(&plan, index, 0))
 		goto fail;
 	if (plan.program_switch) {
 		c = calloc(1, sizeof(*c));
