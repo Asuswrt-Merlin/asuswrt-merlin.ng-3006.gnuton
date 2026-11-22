@@ -27,8 +27,11 @@ code=r'''
 #define GTBE98 1
 #define WAN_UNIT_FIRST 0
 static const char *dot1q="", *owned="0", *ready="0", *extwan="0", *active_extwan="0";
+static const char *wan_name="vlan835";
 static int calls, selected[8], board=1, legacy_status_calls, rtk_status=1, hnd_status=1;
 const char *nvram_safe_get(const char *key) {
+ if(!strcmp(key,"AllLED")) return "1";
+ if(!strcmp(key,"wan_ifname")) return wan_name;
  if(!strcmp(key,"wan0_dot1q")) return dot1q;
  if(!strcmp(key,"gtbe98_wan_vlan_owned")) return owned;
  if(!strcmp(key,"gtbe98_wan_vlan_ready")) return ready;
@@ -70,7 +73,10 @@ static int get_model(void) { return 0; }
 static int gtbe98_vlan_requested(void) { return (*dot1q && strcmp(dot1q,"0")) || !strcmp(owned,"1"); }
 static int ERP_CHECK_MODEL_LIST(void) { ++erp_checks; return 1; }
 static int ERP_CHECK_TCODE_LIST(void) { return 1; }
-static int nvram_get_int(const char *key) { return strcmp(key,"Ate_power_on_off_enable") != 0; }
+static int nvram_get_int(const char *key) {
+ if(!strcmp(key,"wans_extwan")) return !strcmp(extwan,"1");
+ return strcmp(key,"Ate_power_on_off_enable") && strcmp(key,"etlan_led_reset");
+}
 static int erp_check_usb_stat(void) { return 0; }
 static int erp_check_wl_stat(int model) { (void)model; return 0; }
 static int erp_check_arp_stat(int model) { (void)model; return 0; }
@@ -109,6 +115,74 @@ static int switch_ioctl(int fd, unsigned long cmd, int *arg) { assert(fd==42); s
 code+=function('release/src/router/shared/sysdeps/broadcom/rtkswitch.c','int rtkswitch_ioctl(int val, int val2, int val3, int val4, int val5)')+'\n'
 code+='\n#undef open\n#undef close\n#undef ioctl\n'
 code += r'''
+enum { LED_LAN, LED_10G_WHITE };
+enum { LED_OFF, LED_ON };
+static int lstatus = -1, lstatus_extra = -1, allstatus, allstatus_extra;
+static int link_bits, traffic_ports, led_state[2];
+static void led_control(int led, int mode) { led_state[led] = mode; }
+static int led_sched_off(void) { return 0; }
+static int rand_seed_by_time(void) { return 0; }
+static void nvram_set_int(const char *key, int value) { (void)key; (void)value; assert(0); }
+static int GetPhyStatus(int verbose, void *list) { assert(!verbose && !list); return link_bits; }
+static unsigned long get_etlan_count(void) { return 0; }
+static unsigned long get_etlan_count_specific_if(const char *ifname) {
+ if (!strcmp(ifname, "eth0")) traffic_ports |= 0x1;
+ else { assert(!strcmp(ifname, "eth3")); traffic_ports |= 0x40; }
+ return 0;
+}
+'''
+watchdog = 'release/src/router/rc/watchdog.c'
+# The firmware shares LAN6 accounting with models that use lan_num for RGB.
+code += '#pragma GCC diagnostic push\n#pragma GCC diagnostic ignored "-Wunused-but-set-variable"\n'
+for signature in ('static int gtbe98_vlan_owned_extwan(', 'static int gtbe_lan_led_has_link(',
+                  'void fake_etlan_led(void)', 'void fake_etlan_led_extra(void)'):
+    code += function(watchdog, signature) + '\n'
+code += '#pragma GCC diagnostic pop\n'
+code += r'''
+static void test_leds(void) {
+ static const struct {
+  const char *wan_name, *extwan, *dot1q, *owned, *active_extwan;
+  int lan_bits, ten_g_bits;
+ } cases[] = {
+  { "eth0",     "0", "0", "0", "1", 0x3e, 0x40 },
+  { "vlan4094", "1", "0", "0", "0", 0x3d, 0x41 },
+  { "eth3",     "0", "0", "0", "0",    0, 0x40 },
+  /* Tagged ownership outlives pending port changes and a saved disable. */
+  { "vlan835",  "1", "1", "1", "0", 0x3e, 0x40 },
+  { "vlan835",  "0", "1", "1", "1", 0x3d, 0x41 },
+  { "eth3",     "0", "0", "1", "1", 0x3d, 0x41 },
+ };
+ unsigned int i;
+ for (i = 0; i < sizeof(cases) / sizeof(cases[0]); ++i) {
+  wan_name = cases[i].wan_name;
+  extwan = cases[i].extwan;
+  dot1q = cases[i].dot1q;
+  owned = cases[i].owned;
+  active_extwan = cases[i].active_extwan;
+  for (link_bits = 0; link_bits <= 0x7f; ++link_bits) {
+   int j, want_lan = !!(link_bits & cases[i].lan_bits);
+   int ten_g = link_bits & cases[i].ten_g_bits;
+   /* Upstream also lights LAN for the legacy WAN + LAN6 combination. */
+   if (!strcmp(owned, "0") && cases[i].lan_bits &&
+       link_bits == (0x40 | (!strcmp(extwan, "1") ? 0x2 : 0x1)))
+    want_lan = 1;
+   traffic_ports = 0;
+   for (j = 0; j < 10; ++j) {
+    fake_etlan_led();
+    fake_etlan_led_extra();
+   }
+   assert(led_state[LED_LAN] == want_lan);
+   assert(led_state[LED_10G_WHITE] == !!ten_g);
+   assert(traffic_ports == ten_g);
+  }
+ }
+ owned = "0";
+ dot1q = "";
+ extwan = "0";
+ active_extwan = "0";
+ wan_name = "vlan835";
+}
+
 #include <net/if.h>
 static int parent_mtu, mtu_reads, mtu_writes, fail_read, fail_write;
 static int mtu_ioctl(int fd, unsigned long op, struct ifreq *ifr) {
@@ -133,6 +207,7 @@ code += '#undef ioctl\n#undef strlcpy\n'
 code+=r'''
 int main(void) {
  unsigned int i, commands[]={10,11,12,13,36,37,38,39,380,3901,3951,3952,3953};
+ test_leds();
  parent_mtu=9000; assert(!ensure_parent_mtu(42,"eth1",1508) && !mtu_writes && parent_mtu==9000);
  parent_mtu=1500; assert(!ensure_parent_mtu(42,"eth1",1508) && mtu_writes==1 && parent_mtu==1508);
  assert(!ensure_parent_mtu(42,"eth1",1508) && mtu_writes==1);

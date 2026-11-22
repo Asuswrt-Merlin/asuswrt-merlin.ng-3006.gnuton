@@ -6159,6 +6159,35 @@ static int allstatus = 0;
 #endif
 #endif
 
+#ifdef GTBE98
+static int gtbe98_vlan_owned_extwan(void)
+{
+	if (!nvram_match("gtbe98_wan_vlan_owned", "1"))
+		return -1;
+
+	/* The owned port survives pending changes until reboot. */
+	return nvram_match("gtbe98_wan_vlan_extwan", "1");
+}
+#endif
+
+#if defined(GTBE98) || defined(GTBE98_PRO) || defined(GTBE96) || defined(GTBE19000) || defined(GTBE19000AI) || defined(GTBE96_AI)
+static int gtbe_lan_led_has_link(int phystatus)
+{
+#ifdef GTBE98
+	int extwan = gtbe98_vlan_owned_extwan();
+
+	/* Exclude LAN6 (0x40) and the WAN port (LAN1 or W0). */
+	if (extwan >= 0)
+		return (phystatus & ~(extwan ? 0x42 : 0x41)) != 0;
+#endif
+	/* Preserve the upstream exclusions, including the RTL8372 eth3 case. */
+	return phystatus && phystatus != 0x40 &&
+	       (nvram_get_int("wans_extwan") || phystatus != 0x1) &&
+	       !(is_rtl8372_boardid() && nvram_match("wan_ifname", "eth3")) &&
+	       !(nvram_match("wan_ifname", "vlan4094") && phystatus == 0x2);
+}
+#endif
+
 void fake_etlan_led(void)
 {
 #if !defined(GTAC5300) && !defined(RTAX88U) && !defined(BC109) && !defined(EBG19)
@@ -6242,10 +6271,7 @@ void fake_etlan_led(void)
 			|| (nvram_match("wan_ifname", "eth5") && phystatus == 0x20 && !hnd_get_phy_status("eth0"))
 			|| (nvram_match("wan_ifname", "eth6") && phystatus == 0x40 && !hnd_get_phy_status("eth0"))
 #elif defined(GTBE98) || defined(GTBE98_PRO) || defined(GTBE96) || defined(GTBE19000) || defined(GTBE19000AI) || defined(GTBE96_AI)
-			|| (phystatus == 0x40)
-			|| (!nvram_get_int("wans_extwan") && phystatus == 0x1)
-			|| ((is_rtl8372_boardid() && nvram_match("wan_ifname", "eth3")) || (!is_rtl8372_boardid() && nvram_match("wan_ifname", "eth6")) && phystatus == 0x40 && !hnd_get_phy_status("eth0"))
-			|| (nvram_match("wan_ifname", "vlan4094") && phystatus == 0x2)
+			|| !gtbe_lan_led_has_link(phystatus)
 #elif defined(RTBE88U)
 			|| (nvram_match("wan_ifname", "eth0") && phystatus == 0x1)
 			|| (nvram_match("wan_ifname", "eth1") && phystatus == 0x2 && !hnd_get_phy_status("eth0")) // 2.5G LAN1
@@ -6332,6 +6358,9 @@ void fake_etlan_led_extra(void)
 	int phystatus = 0;
 	int lan_num = 0;
 	static int led;
+#if defined(GTBE98) || defined(GTBE98_PRO) || defined(GTBE96) || defined(GTBE19000) || defined(GTBE19000AI) || defined(GTBE96_AI)
+	int extwan;
+#endif
 
 	if (nvram_match("AllLED", "0") || led_sched_off()) {
 		if (allstatus_extra) {
@@ -6349,8 +6378,14 @@ void fake_etlan_led_extra(void)
 #if defined(GTAXE16000) || defined(GTAX11000_PRO)
 	if (!(phystatus & 0x60)) // both 10GE ports(L5 & L6) are not connected
 #elif defined(GTBE98) || defined(GTBE98_PRO) || defined(GTBE96) || defined(GTBE19000) || defined(GTBE19000AI) || defined(GTBE96_AI)
-	if ((nvram_get_int("wans_extwan") && !(phystatus & 0x41)) || 	// configure 2.5G WAN/LAN1 as default WAN and both 10GE ports(W0/L6) are not connected
-	    (!nvram_get_int("wans_extwan") && !(phystatus & 0x40))) 	// configure 10GE(W0) as as default WAN and 10GE port(L6) is not connected
+#ifdef GTBE98
+	extwan = gtbe98_vlan_owned_extwan();
+	if (extwan < 0)
+#endif
+		extwan = nvram_get_int("wans_extwan");
+	/* LAN6 always counts. The 10G WAN/LAN port counts when used as LAN. */
+	phystatus &= extwan ? 0x41 : 0x40;
+	if (!phystatus)
 #elif defined(RTBE88U)
 	if (!(phystatus & 0x1)) // 10GE port(WAN) is not connected
 #else
@@ -6371,17 +6406,15 @@ void fake_etlan_led_extra(void)
 	// check data per 10 count
 	if ((blink_check%10) == 0) {
 #if defined(GTBE98) || defined(GTBE98_PRO) || defined(GTBE96) || defined(GTBE19000) || defined(GTBE19000AI) || defined(GTBE96_AI)
-		if ((phystatus & 0x40) || (nvram_get_int("wans_extwan") && (phystatus & 0x1))) {
-			if (!is_rtl8372_boardid())
-				curr_count += get_etlan_count_specific_if("eth6");
-			else {
-				if (phystatus & 0x40)
-					curr_count += get_etlan_count_specific_if("eth3");
-				if (nvram_get_int("wans_extwan") && (phystatus & 0x1))
-					curr_count += get_etlan_count_specific_if("eth0");
-			}
-			lan_num++;
+		if (!is_rtl8372_boardid())
+			curr_count += get_etlan_count_specific_if("eth6");
+		else {
+			if (phystatus & 0x40)
+				curr_count += get_etlan_count_specific_if("eth3");
+			if (phystatus & 0x1)
+				curr_count += get_etlan_count_specific_if("eth0");
 		}
+		lan_num++;
 #elif defined(RTBE88U)
 		if (phystatus & 0x1) { curr_count += get_etlan_count_specific_if("eth0");}
 #else
