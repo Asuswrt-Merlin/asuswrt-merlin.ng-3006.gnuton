@@ -45,13 +45,16 @@ int mock_eval(const char *cmd,const char *op,...) {
  va_list ap; const char *arg; assert(!strcmp(cmd,"rtkswitch"));
  va_start(ap,op);arg=va_arg(ap,const char *);va_end(ap);
  assert(calls<8);
- if(!strcmp(op,"12")){assert(arg);selected[calls++]=arg[0]-'0';}
- else {assert(!strcmp(op,"5"));selected[calls++]=5;}
+ if(!strcmp(op,"12") || !strcmp(op,"13")){
+  assert(arg); selected[calls++]=(!strcmp(op,"12") ? 1 : -1)*(arg[0]-'0');
+ }
+ else {assert(!strcmp(op,"5") || !strcmp(op,"6"));selected[calls++]=op[0]-'0';}
  return 0;
 }
 #define eval(...) mock_eval(__VA_ARGS__,NULL)
 '''
-code+=function('release/src/router/shared/sysdeps/broadcom/rtkswitch.c','int rtkswitch_LanPort_linkUp(void)')+'\n'
+for signature in ('static int rtkswitch_lan_power(int up)', 'int rtkswitch_LanPort_linkUp(void)', 'int rtkswitch_LanPort_linkDown(void)'):
+    code += function('release/src/router/shared/sysdeps/broadcom/rtkswitch.c', signature) + '\n'
 code+=function('release/src/router/shared/boardapi.c','int wanport_status(int wan_unit)')+'\n'
 code+=r'''
 #include <limits.h>
@@ -107,7 +110,7 @@ code+=function('release/src/router/shared/sysdeps/broadcom/rtkswitch.c','int rtk
 code+='\n#undef open\n#undef close\n#undef ioctl\n'
 code+=r'''
 int main(void) {
- unsigned int i, commands[]={10,11,12,36,37,38,39,380,3901,3951,3952,3953};
+ unsigned int i, commands[]={10,11,12,13,36,37,38,39,380,3901,3951,3952,3953};
  for(i=0;i<sizeof(commands)/sizeof(commands[0]);++i) {
   assert(!rtkswitch_ioctl(commands[i],0x28,0,0,0));
   assert(_IOC_TYPE(sent_ioctl)=='R' && _IOC_DIR(sent_ioctl)==_IOC_NONE);
@@ -115,12 +118,18 @@ int main(void) {
   assert(sent_argument==0x28);
  }
  assert(rtkswitch_LanPort_linkUp()==0 && calls==1 && selected[0]==5);
+ calls=0; assert(rtkswitch_LanPort_linkDown()==0 && calls==1 && selected[0]==6);
  dot1q="1"; extwan="1"; calls=0;
+ assert(rtkswitch_LanPort_linkDown()==0 && calls==3);
+ assert(selected[0]==-1 && selected[1]==-2 && selected[2]==-3);
+ calls=0;
  assert(rtkswitch_LanPort_linkUp()==0 && calls==3);
  assert(selected[0]==1 && selected[1]==2 && selected[2]==3);
  dot1q="invalid"; calls=0; assert(rtkswitch_LanPort_linkUp()==0 && calls==3);
  dot1q="0";owned="1";extwan="0";active_extwan="1";calls=0;
  assert(rtkswitch_LanPort_linkUp()==0 && calls==3);
+ calls=0; assert(rtkswitch_LanPort_linkDown()==0 && calls==3);
+ assert(selected[0]==-1 && selected[1]==-2 && selected[2]==-3);
  assert(wanport_status(0)==0 && legacy_status_calls==0);
  ready="1";assert(wanport_status(0)==1);rtk_status=-1;assert(wanport_status(0)==0);
  active_extwan="0";assert(wanport_status(0)==1);hnd_status=-1;assert(wanport_status(0)==0);
