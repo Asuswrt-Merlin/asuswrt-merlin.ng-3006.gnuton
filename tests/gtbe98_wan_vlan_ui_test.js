@@ -4,11 +4,28 @@ const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
 const www = path.join(__dirname, '../release/src/router/www');
+const pages = ['Advanced_WAN_Content.asp', 'Advanced_WANPort_Content.asp', 'Advanced_IPTV_Content.asp', 'wan_vlan_apply_error.htm'];
+const templates = pages.map(file => fs.readFileSync(path.join(www, file), 'utf8'));
+const vlanKeys = new Set(templates.flatMap(html => [...html.matchAll(/<#(WANVLAN\w+)#>/g)].map(match => match[1])));
+function vlanDictionary(file) {
+    const translations = new Map();
+    for (const [, key, value] of fs.readFileSync(path.join(www, file), 'utf8').matchAll(/^(WANVLAN\w+)=(.+)$/gm)) {
+        assert(!translations.has(key), `${file}: duplicate ${key}`);
+        translations.set(key, value);
+    }
+    for (const key of vlanKeys) assert(translations.has(key), `${file}: missing ${key}`);
+    return translations;
+}
+function render(template, translations) {
+    return template.replace(/<%[\s\S]*?%>/g, '0')
+        .replace(/<#([\s\S]*?)#>/g, (_, key) => translations.get(key) ?? 'translated');
+}
+const english = vlanDictionary('EN.dict');
 const source = fs.readFileSync(path.join(www, 'Advanced_WAN_Content.asp'), 'utf8');
 const begin = source.indexOf('function gtbe98_vlan_validate()');
 const end = source.indexOf('\nif(wan_bonding_support)', begin);
 assert(begin > 0 && end > begin);
-const validator = source.substring(begin, end);
+const validator = render(source.substring(begin, end), english);
 function context() {
     const state = { autowan_enable: '0', wans_dualwan: 'wan none', wans_standby: '0', wans_usb_bk: '0', wans_usb_bk_act: '0', vlan_enable: '0', vlan_rl: '' };
     const result = { wan_bonding_support: false, gtbe98_vlan_model: true, gtbe98_vlan_cap: true, original_switch_wantag: 'none', original_switch_stb_x: '0', reboot_confirm: 0,
@@ -37,7 +54,7 @@ for (const priority of ['8', '-1', '00', '0 ', '']) {
     c = context(); c.document.form.wan_dot1p.value = priority; assert(!c.gtbe98_vlan_validate());
 }
 c = context(); c.original_switch_wantag = 'manual'; assert(!c.gtbe98_vlan_validate());
-assert.equal(c.original_switch_wantag, 'manual'); assert(c.messages[0].includes('not migrated automatically'));
+assert.equal(c.original_switch_wantag, 'manual'); assert.equal(c.messages[0], english.get('WANVLAN_migrate_iptv'));
 for (const [key, value] of Object.entries({ autowan_enable: '1', wans_dualwan: 'wan usb', wans_standby: '1', wans_usb_bk: '1', wans_usb_bk_act: '1', vlan_enable: '1', vlan_rl: '<1>10' })) {
     c = context(); c.state[key] = value; assert(!c.gtbe98_vlan_validate());
 }
@@ -45,15 +62,16 @@ c = context(); c.gtbe98_vlan_cap = false; assert(!c.gtbe98_vlan_validate()); ass
 c = context(); c.gtbe98_vlan_cap = false; c.gtbe98_vlan_original.enable = '1'; c.document.form.wan_dot1q.value = '0';
 assert(c.gtbe98_vlan_validate()); assert.equal(c.reboot_confirm, 1);
 c = context(); c.gtbe98_vlan_original.enable = '1'; c.document.form.wan_dot1q.value = '0'; assert(c.gtbe98_vlan_validate()); assert.equal(c.reboot_confirm, 1);
-// Compile the actual page scripts after replacing server template expressions.
-for (const file of ['Advanced_WAN_Content.asp', 'Advanced_WANPort_Content.asp', 'Advanced_IPTV_Content.asp']) {
-    const html = fs.readFileSync(path.join(www, file), 'utf8');
-    for (const match of html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/gi)) {
-        const script = match[1].replace(/<%[\s\S]*?%>/g, '0').replace(/<#[\s\S]*?#>/g, 'translated');
-        new vm.Script(script, { filename: file });
+// Compile the page scripts with the actual VLAN strings from each dictionary.
+for (const dictionary of fs.readdirSync(www).filter(file => file.endsWith('.dict'))) {
+    const translations = vlanDictionary(dictionary);
+    for (const [index, html] of templates.entries()) {
+        for (const match of html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/gi)) {
+            new vm.Script(render(match[1], translations), { filename: `${pages[index]} (${dictionary})` });
+        }
     }
 }
-console.log('GT-BE98 WAN VLAN UI validation and page script syntax passed');
+console.log('GT-BE98 WAN VLAN UI validation and localized page script syntax passed');
 
 // A missing capability must block enable but still allow disabling a saved
 // configuration. Execute the actual initialization branch and inspect radios.
@@ -75,7 +93,7 @@ for (const enabled of ['0', '1']) {
 // Browser-independent form mocks distinguish this from a browser acceptance run.
 const applyBegin = source.indexOf('function applyRule(){');
 const applyEnd = source.indexOf('\nvar ctf =', applyBegin);
-const applySource = source.substring(applyBegin, applyEnd).replace(/<%[\s\S]*?%>/g, '0').replace(/<#[\s\S]*?#>/g, 'translated');
+const applySource = render(source.substring(applyBegin, applyEnd), english);
 const stateSource = fs.readFileSync(path.join(www, 'state.js'), 'utf8');
 const actionsBegin = stateSource.indexOf('function FormActions(');
 const actionsEnd = stateSource.indexOf('\nfunction change_wl_unit', actionsBegin);

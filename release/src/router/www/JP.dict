@@ -4496,6 +4496,15 @@ wandog_enable2=インターネットへの Ping
 WANTCPMSSOptionText=TCP MSS オプション
 WANTCPMSSOptionComm1Text=バイト
 WANVLANIDText=VLAN ID
+WANVLAN_priority=802.1p 優先度
+WANVLAN_unavailable=WAN VLAN は現在利用できません。有効になっている場合は、「いいえ」を選択して「適用」をクリックし、無効化してルーターを再起動してください。
+WANVLAN_invalid_range=VLAN ID は 3～4093、優先度は 0～7 の範囲で入力してください。
+WANVLAN_migrate_iptv=先に LAN > IPTV で ISP プロファイルと STB ポートを無効にしてください。既存の ISP VLAN は自動で移行されません。ここに入力してください。
+WANVLAN_topology=WAN VLAN を使用するには、WAN を手動で 1 つ選択してください。先に AutoWAN、デュアル WAN、USB バックアップとスタンバイ、WAN アグリゲーション、LAN VLAN を無効にしてください。
+WANVLAN_iptv_locked=IPTV 設定を変更する前に、WAN > インターネット接続で 802.1Q を無効にし、ルーターを再起動してください。
+WANVLAN_port_locked=WAN VLAN を使用するには、WAN を手動で 1 つ選択し、USB スタンバイを無効にしてください。モードを変更する前に、WAN > インターネット接続で 802.1Q を無効にしてください。
+WANVLAN_help=手動で選択した 10G WAN または 2.5G LAN/WAN ポートにインターネット用 VLAN を 1 つ設定します。先に IPTV、AutoWAN、デュアル WAN、USB バックアップとスタンバイ、WAN アグリゲーション、LAN VLAN を無効にしてください。WAN VLAN が有効な間は ErP スタンバイが停止します。手動 IPTV プロファイルを置き換える場合は、先にプロファイルを無効にして ISP VLAN をここに入力してください。VLAN やポートの変更には再起動が必要です。IPTV プロファイルを復元する前に、WAN VLAN を無効にしてルーターを再起動してください。
+WANVLAN_apply_failed=WAN VLAN の検証に失敗したため、設定を適用できませんでした。ページが再読み込みされます。設定を確認して再試行してください。
 WANAggregation=WAN アグリゲーション
 WANAggregation_desc=WAN アグリゲーションは、2つのネットワークを組み合わせて、最大 2Gbps に高速通信を可能にします。ルーターの #WAN ポートと LAN 4 ポートをモデムの LAN ポートに接続します（必ず同じ仕様の2本のケーブルをご使用ください）。 <a id="wanAgg_faq" target="_blank" style="color:#FFCC00;text-decoration:underline;">WAN アグリゲーションに関する FAQ</a>
 WANAggregation_enable=WAN アグリゲーションを有効にする

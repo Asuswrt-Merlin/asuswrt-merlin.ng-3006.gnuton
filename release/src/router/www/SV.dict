@@ -4496,6 +4496,15 @@ wandog_enable2=Enable Ping to Internet
 WANTCPMSSOptionText=TCP MSS-alternativ
 WANTCPMSSOptionComm1Text=byte
 WANVLANIDText=VLAN-ID
+WANVLAN_priority=802.1p-prioritet
+WANVLAN_unavailable=WAN-VLAN är inte tillgängligt just nu. Om det är aktiverat väljer du «Nej» och klickar på «Tillämpa» för att inaktivera det och starta om routern.
+WANVLAN_invalid_range=Ange ett VLAN-ID från 3 till 4093 och en prioritet från 0 till 7.
+WANVLAN_migrate_iptv=Inaktivera först operatörsprofilen och STB-porten under LAN > IPTV. Operatörens VLAN överförs inte automatiskt. Ange det här.
+WANVLAN_topology=WAN-VLAN kräver en manuellt vald WAN-anslutning. Inaktivera först AutoWAN, dubbel WAN, reservanslutning och vänteläge via USB, WAN-aggregering och LAN-VLAN.
+WANVLAN_iptv_locked=Inaktivera 802.1Q under WAN > Internetanslutning och starta om routern innan du ändrar IPTV-inställningarna.
+WANVLAN_port_locked=WAN-VLAN kräver en manuellt vald WAN-anslutning utan USB-vänteläge. Inaktivera 802.1Q under WAN > Internetanslutning innan du byter läge.
+WANVLAN_help=Konfigurera ett internet-VLAN på den manuellt valda 10G WAN- eller 2,5G LAN/WAN-porten. Inaktivera först IPTV, AutoWAN, dubbel WAN, reservanslutning och vänteläge via USB, WAN-aggregering och LAN-VLAN. ErP-vänteläget pausas medan WAN-VLAN är aktiverat. Om du vill ersätta en manuell IPTV-profil ska du först inaktivera profilen och ange operatörens VLAN här. Om du byter VLAN eller port måste routern startas om. Inaktivera WAN-VLAN och starta om routern innan du återställer IPTV-profilen.
+WANVLAN_apply_failed=Inställningarna kunde inte tillämpas eftersom valideringen av WAN-VLAN misslyckades. Sidan läses in igen. Kontrollera inställningarna och försök igen.
 WANAggregation=WAN-aggregering
 WANAggregation_desc=WAN-aggregeringen kombinerar två nätverksanslutningar för att öka WAN-hastigheten till upp till 2 Gbit/s. Anslut routerns #WAN-port och LAN 4-port till modemets LAN-portar (se till att använda två kablar med samma specifikationer). <a id="wanAgg_faq" target="_blank" style="color:#FFCC00;text-decoration:underline;">Vanliga frågor om WAN-aggregering</a>
 WANAggregation_enable=Aktivera WAN-aggregering

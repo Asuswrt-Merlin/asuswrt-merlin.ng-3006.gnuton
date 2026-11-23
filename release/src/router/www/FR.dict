@@ -4496,6 +4496,15 @@ wandog_enable2=Enable Ping to Internet
 WANTCPMSSOptionText=Options TCP MSS
 WANTCPMSSOptionComm1Text=octets
 WANVLANIDText=Identifiant VLAN
+WANVLAN_priority=Priorité 802.1p
+WANVLAN_unavailable=Le VLAN WAN est actuellement indisponible. S’il est activé, sélectionnez «Non» et cliquez sur «Appliquer» pour le désactiver et redémarrer le routeur.
+WANVLAN_invalid_range=Saisissez un ID de VLAN compris entre 3 et 4093 et une priorité comprise entre 0 et 7.
+WANVLAN_migrate_iptv=Désactivez d’abord le profil du fournisseur d’accès et le port STB dans LAN > IPTV. Le VLAN du fournisseur n’est pas migré automatiquement. Saisissez-le ici.
+WANVLAN_topology=Le VLAN WAN nécessite une seule connexion WAN sélectionnée manuellement. Désactivez d’abord AutoWAN, le double WAN, le secours et la veille USB, l’agrégation WAN et les VLAN du réseau local.
+WANVLAN_iptv_locked=Désactivez 802.1Q dans Réseau étendu > Connexion Internet et redémarrez le routeur avant de modifier les paramètres IPTV.
+WANVLAN_port_locked=Le VLAN WAN nécessite une seule connexion WAN sélectionnée manuellement, sans veille USB. Désactivez 802.1Q dans Réseau étendu > Connexion Internet avant de changer de mode.
+WANVLAN_help=Configurez un seul VLAN Internet sur le port WAN 10G ou LAN/WAN 2,5G sélectionné manuellement. Désactivez d’abord IPTV, AutoWAN, le double WAN, le secours et la veille USB, l’agrégation WAN et les VLAN du réseau local. La veille ErP est suspendue tant que le VLAN WAN est activé. Pour remplacer un profil IPTV manuel, désactivez-le d’abord et saisissez le VLAN du fournisseur ici. Toute modification du VLAN ou du port nécessite un redémarrage. Pour rétablir le profil IPTV, désactivez d’abord le VLAN WAN et redémarrez le routeur.
+WANVLAN_apply_failed=Les paramètres n’ont pas pu être appliqués, car la validation du VLAN WAN a échoué. La page va se recharger. Vérifiez les paramètres et réessayez.
 WANAggregation=Agrégation WAN
 WANAggregation_desc=L'agrégation WAN combine deux connexions réseau pour augmenter la vitesse de votre réseau étendu (WAN) jusqu'à 2 Gb/s. Connectez le port #WAN et le port LAN 4 de votre routeur aux ports LAN de votre modem (veillez à utiliser deux câbles de même spécification). <a id="wanAgg_faq" target="_blank" style="color:#FFCC00;text-decoration:underline;">FAQ sur l'agrégation WAN</a>
 WANAggregation_enable=Activer l’agrégation WAN

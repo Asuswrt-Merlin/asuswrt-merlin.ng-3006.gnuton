@@ -4496,6 +4496,15 @@ wandog_enable2=Enable Ping to Internet
 WANTCPMSSOptionText=TCP MSS Option
 WANTCPMSSOptionComm1Text=bytes
 WANVLANIDText=VLAN ID
+WANVLAN_priority=802.1p priority
+WANVLAN_unavailable=WAN VLAN is currently unavailable. If enabled, select «No» and click «Apply» to disable it and reboot.
+WANVLAN_invalid_range=Enter a VLAN ID from 3 to 4093 and a priority from 0 to 7.
+WANVLAN_migrate_iptv=Disable the ISP profile and the STB port in LAN > IPTV first. The ISP VLAN is not migrated automatically. Enter it here.
+WANVLAN_topology=WAN VLAN requires one manually selected WAN. Disable AutoWAN, Dual WAN, USB backup and standby, WAN aggregation and LAN VLANs first.
+WANVLAN_iptv_locked=Disable 802.1Q in WAN > Internet Connection and reboot before changing IPTV settings.
+WANVLAN_port_locked=WAN VLAN requires one manually selected WAN without USB standby. Disable 802.1Q in WAN > Internet Connection before changing this mode.
+WANVLAN_help=Configure one Internet VLAN on the manually selected 10G WAN or 2.5G LAN/WAN port. Disable IPTV, AutoWAN, Dual WAN, USB backup and standby, WAN aggregation and LAN VLANs first. ErP standby is suspended while WAN VLAN is enabled. To replace a manual IPTV profile, disable it first and enter its ISP VLAN here. VLAN or port changes require a reboot. To restore the IPTV profile, disable WAN VLAN and reboot first.
+WANVLAN_apply_failed=The settings could not be applied because WAN VLAN validation failed. The page will reload. Check the settings and try again.
 WANAggregation=WAN aggregation
 WANAggregation_desc=WAN Aggregation combines two network connections to increase your WAN speed up to 2Gbps. Connect your router's #WAN port and LAN 4 port to your modem's LAN ports (ensure you use two cables with the same specification). <a id="wanAgg_faq" target="_blank" style="color:#FFCC00;text-decoration:underline;">WAN Aggregation FAQ</a>
 WANAggregation_enable=Enable WAN Aggregation

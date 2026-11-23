@@ -4496,6 +4496,15 @@ wandog_enable2=Enable Ping to Internet
 WANTCPMSSOptionText=Volba TCP MSS
 WANTCPMSSOptionComm1Text=bajtů
 WANVLANIDText=VLAN ID
+WANVLAN_priority=Priorita 802.1p
+WANVLAN_unavailable=VLAN WAN momentálně není dostupná. Pokud je zapnutá, zvolte «NE» a kliknutím na «Použít» ji vypněte a restartujte router.
+WANVLAN_invalid_range=Zadejte ID VLAN od 3 do 4093 a prioritu od 0 do 7.
+WANVLAN_migrate_iptv=Nejprve v části LAN > IPTV vypněte profil poskytovatele a port STB. VLAN poskytovatele se nepřenáší automaticky. Zadejte ji zde.
+WANVLAN_topology=VLAN WAN vyžaduje jednu ručně vybranou WAN. Nejprve vypněte AutoWAN, duální WAN, zálohování a pohotovost přes USB, agregaci WAN a VLAN v síti LAN.
+WANVLAN_iptv_locked=Před změnou nastavení IPTV vypněte 802.1Q v části WAN > Internetové připojení a restartujte router.
+WANVLAN_port_locked=VLAN WAN vyžaduje jednu ručně vybranou WAN bez pohotovostního režimu USB. Před změnou režimu vypněte 802.1Q v části WAN > Internetové připojení.
+WANVLAN_help=Nastavte jednu internetovou VLAN na ručně vybraném portu 10G WAN nebo 2,5G LAN/WAN. Nejprve vypněte IPTV, AutoWAN, duální WAN, zálohování a pohotovost přes USB, agregaci WAN a VLAN v síti LAN. Při zapnuté VLAN WAN je pohotovost ErP pozastavena. Chcete-li nahradit ruční profil IPTV, nejprve jej vypněte a zadejte zde VLAN poskytovatele. Změna VLAN nebo portu vyžaduje restart. Před obnovením profilu IPTV vypněte VLAN WAN a restartujte router.
+WANVLAN_apply_failed=Nastavení nelze použít, protože ověření VLAN WAN selhalo. Stránka se načte znovu. Zkontrolujte nastavení a akci opakujte.
 WANAggregation=Agregace WAN
 WANAggregation_desc=Agregace WAN kombinuje dvě síťová připojení pro zvýšení rychlosti vaší sítě WAN na 2 Gb/s. Připojte port #WAN vaše směrovače a port LAN 4 k portům LAN vašeho modemu (použijte dva kabely se stejnými specifikacemi). <a id="wanAgg_faq" target="_blank" style="color:#FFCC00;text-decoration:underline;">Agregace WAN – odpovědi na časté dotazy</a>
 WANAggregation_enable=Povolit agregaci WAN

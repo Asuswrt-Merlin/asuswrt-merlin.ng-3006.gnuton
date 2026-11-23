@@ -4496,6 +4496,15 @@ wandog_enable2=启用 ping 互联网
 WANTCPMSSOptionText=TCP MSS 选项
 WANTCPMSSOptionComm1Text=字节
 WANVLANIDText=VLAN ID
+WANVLAN_priority=802.1p 优先级
+WANVLAN_unavailable=WAN VLAN 暂不可用。若已启用，请选择「否」并点击「应用本页面设置」，以停用此功能并重启路由器。
+WANVLAN_invalid_range=请输入 3 至 4093 的 VLAN ID 和 0 至 7 的优先级。
+WANVLAN_migrate_iptv=请先在 LAN > IPTV 中停用网络服务提供商配置文件和 STB 端口。原有的运营商 VLAN 不会自动迁移，请在此输入。
+WANVLAN_topology=WAN VLAN 仅支持一个手动选择的 WAN。请先停用 AutoWAN、双 WAN、USB 备份和待机、WAN 聚合及 LAN VLAN。
+WANVLAN_iptv_locked=请先在 外部网络(WAN) > 互联网连接 中停用 802.1Q 并重启路由器，再修改 IPTV 设置。
+WANVLAN_port_locked=WAN VLAN 要求手动选择一个 WAN，并停用 USB 待机。更改模式前，请先在 外部网络(WAN) > 互联网连接 中停用 802.1Q。
+WANVLAN_help=在手动选择的 10G WAN 或 2.5G LAN/WAN 端口上配置一个互联网 VLAN。请先停用 IPTV、AutoWAN、双 WAN、USB 备份和待机、WAN 聚合及 LAN VLAN。启用 WAN VLAN 时将暂停 ErP 待机。若要替换手动 IPTV 配置文件，请先停用该配置文件，再在此输入运营商 VLAN。更改 VLAN 或端口后须重启。若要恢复 IPTV 配置文件，请先停用 WAN VLAN 并重启路由器。
+WANVLAN_apply_failed=WAN VLAN 验证失败，无法应用设置。页面将重新加载，请检查设置后重试。
 WANAggregation=WAN 聚合
 WANAggregation_desc=WAN Aggregation 融合了两条网络连接，将您的 WAN 传送速度提高至 2Gbps。请使用同一规格的两条网线将路由器的 #WAN 接口和 LAN 4 接口分别连接至调制解调器的 LAN 接口。 <a id="wanAgg_faq" target="_blank" style="color:#FFCC00;text-decoration:underline;">WAN Aggregation FAQ</a>
 WANAggregation_enable=启用 WAN 聚合

@@ -4496,6 +4496,15 @@ wandog_enable2=Enable Ping to Internet
 WANTCPMSSOptionText=TCP MSS Valg
 WANTCPMSSOptionComm1Text=Bytes
 WANVLANIDText=VLAN ID
+WANVLAN_priority=802.1p-prioritet
+WANVLAN_unavailable=WAN-VLAN er ikke tilgjengelig for øyeblikket. Hvis det er aktivert, velger du «Nei» og klikker på «Bruk» for å deaktivere det og starte ruteren på nytt.
+WANVLAN_invalid_range=Angi en VLAN-ID fra 3 til 4093 og en prioritet fra 0 til 7.
+WANVLAN_migrate_iptv=Deaktiver først leverandørprofilen og STB-porten under LAN > IPTV. Leverandørens VLAN overføres ikke automatisk. Angi det her.
+WANVLAN_topology=WAN-VLAN krever én manuelt valgt WAN-tilkobling. Deaktiver først AutoWAN, dobbel WAN, USB-reserve og -ventemodus, WAN-aggregering og LAN-VLAN.
+WANVLAN_iptv_locked=Deaktiver 802.1Q under WAN > Internettilkobling og start ruteren på nytt før du endrer IPTV-innstillingene.
+WANVLAN_port_locked=WAN-VLAN krever én manuelt valgt WAN-tilkobling uten USB-ventemodus. Deaktiver 802.1Q under WAN > Internettilkobling før du endrer modus.
+WANVLAN_help=Konfigurer ett Internett-VLAN på den manuelt valgte 10G WAN- eller 2,5G LAN/WAN-porten. Deaktiver først IPTV, AutoWAN, dobbel WAN, USB-reserve og -ventemodus, WAN-aggregering og LAN-VLAN. ErP-ventemodus er suspendert mens WAN-VLAN er aktivert. For å erstatte en manuell IPTV-profil deaktiverer du den først og angir leverandørens VLAN her. Endring av VLAN eller port krever omstart. Deaktiver WAN-VLAN og start ruteren på nytt før du gjenoppretter IPTV-profilen.
+WANVLAN_apply_failed=Innstillingene kunne ikke tas i bruk fordi valideringen av WAN-VLAN mislyktes. Siden lastes på nytt. Kontroller innstillingene og prøv igjen.
 WANAggregation=WAN-aggregering
 WANAggregation_desc=WAN-aggregering kombinerer to nettverktilkoblinger, slik at WAN-hastigheten økes til 2 Gbps. Koble ruterens #WAN-port og LAN 4-port til modemets LAN-porter (forsikre deg om at du bruker to kabler med samme spesifikasjon). <a id="wanAgg_faq" target="_blank" style="color:#FFCC00;text-decoration:underline;">WAN-aggregering – ofte stilte spørsmål</a>
 WANAggregation_enable=Aktiver WAN-aggregering

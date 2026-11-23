@@ -143,17 +143,17 @@ function gtbe98_vlan_validate() {
 	if (!gtbe98_vlan_model) return true;
 	if (document.form.wan_dot1q.value == "1") {
 		if (!gtbe98_vlan_cap) {
-			alert("WAN VLAN is currently unavailable. Select No and apply to disable it and reboot.");
+			alert("<#WANVLAN_unavailable#>");
 			return false;
 		}
 		if (!/^[0-9]{1,4}$/.test(document.form.wan_vid.value) ||
 		    Number(document.form.wan_vid.value) < 3 || Number(document.form.wan_vid.value) > 4093 ||
 		    !/^[0-7]$/.test(document.form.wan_dot1p.value)) {
-			alert("WAN VLAN requires a VLAN ID from 3 to 4093 and priority from 0 to 7.");
+			alert("<#WANVLAN_invalid_range#>");
 			return false;
 		}
 		if (original_switch_wantag != "none" || original_switch_stb_x != "0") {
-			alert("First disable the IPTV ISP profile and STB port on LAN > IPTV. The existing ISP VLAN is not migrated automatically; then enter it here.");
+			alert("<#WANVLAN_migrate_iptv#>");
 			return false;
 		}
 		var keys = ["autowan_enable", "wans_dualwan", "wans_standby", "wans_usb_bk", "wans_usb_bk_act", "vlan_enable", "vlan_rl"];
@@ -164,7 +164,7 @@ function gtbe98_vlan_validate() {
 		    state.vlan_enable != "0" || state.vlan_rl != "" ||
 		    (wan_bonding_support && (state.bond_wan != "0" ||
 		     (document.form.bond_wan_radio && document.form.bond_wan_radio.value != "0")))) {
-			alert("WAN VLAN requires one manually selected WAN. Disable AutoWAN, Dual WAN, USB backup/standby, WAN aggregation and LAN VLAN configuration first.");
+			alert("<#WANVLAN_topology#>");
 			return false;
 		}
 	}
@@ -2752,7 +2752,7 @@ function get_default_wan_name(){
 						</tr>
 						</table>
 
-						<div id="gtbe98_vlan_unavailable" style="display:none;padding:12px">WAN VLAN is currently unavailable. If enabled, select No and apply to disable it and reboot.</div>
+						<div id="gtbe98_vlan_unavailable" style="display:none;padding:12px"><#WANVLAN_unavailable#></div>
 						<table id="wan_dot1q_setting" width="100%" border="1" align="center" cellpadding="4" cellspacing="0" bordercolor="#6b8fa3" class="FormTable">
 						<thead><tr><td colspan="2">802.1Q</td></tr></thead>
 						<tr>
@@ -2763,16 +2763,16 @@ function get_default_wan_name(){
 							</td>
 						</tr>
 						<tr>
-							<th>VLAN ID</th>
+							<th><#WANVLANIDText#></th>
 							<td>
 								<input type="text" name="wan_vid" maxlength="4" class="input_6_table" value="<% nvram_get("wan_vid"); %>" onKeyPress="return validator.isNumber(this,event);"> <span id="wan_vid_range">( 2 ~ 4094 )</span>
 							</td>
 						</tr>
 							<tr id="gtbe98_vlan_priority" style="display:none">
-								<th>802.1p priority</th>
+								<th><#WANVLAN_priority#></th>
 								<td><input type="text" name="wan_dot1p" maxlength="1" class="input_6_table" value="0" onKeyPress="return validator.isNumber(this,event);"> ( 0 ~ 7 )</td>
 							</tr>
-							<tr id="gtbe98_vlan_help" style="display:none"><td colspan="2">One Internet VLAN on the manually selected 10G WAN or 2.5G LAN/WAN port. IPTV, AutoWAN, Dual WAN, USB backup/standby, WAN aggregation and LAN VLAN configuration must be disabled. ErP standby is suspended while this option is active. To replace a manual IPTV profile, disable that profile first and enter its ISP VLAN here. VLAN or port changes require a reboot. To return to IPTV tagging, disable this option and reboot before restoring the IPTV profile.</td></tr>
+							<tr id="gtbe98_vlan_help" style="display:none"><td colspan="2"><#WANVLAN_help#></td></tr>
 						</table>
 
 						<table id="IPsetting" width="100%" border="1" align="center" cellpadding="4" cellspacing="0" bordercolor="#6b8fa3" class="FormTable">

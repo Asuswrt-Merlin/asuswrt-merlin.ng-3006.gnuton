@@ -4496,6 +4496,15 @@ wandog_enable2=Enable Ping to Internet
 WANTCPMSSOptionText=Opcja MSS protokołu TCP
 WANTCPMSSOptionComm1Text=bajty
 WANVLANIDText=Identyfikator sieci VLAN
+WANVLAN_priority=Priorytet 802.1p
+WANVLAN_unavailable=Sieć VLAN WAN jest obecnie niedostępna. Jeśli jest włączona, wybierz «Nie» i kliknij «Zastosuj», aby ją wyłączyć i ponownie uruchomić router.
+WANVLAN_invalid_range=Wprowadź identyfikator VLAN od 3 do 4093 i priorytet od 0 do 7.
+WANVLAN_migrate_iptv=Najpierw wyłącz profil dostawcy i port STB w menu LAN > IPTV. Sieć VLAN dostawcy nie zostanie przeniesiona automatycznie. Wprowadź ją tutaj.
+WANVLAN_topology=Sieć VLAN WAN wymaga jednego ręcznie wybranego połączenia WAN. Najpierw wyłącz AutoWAN, Dual WAN, zapasowe połączenie i tryb gotowości USB, agregację WAN oraz sieci VLAN w sieci LAN.
+WANVLAN_iptv_locked=Wyłącz 802.1Q w menu WAN > Połączenie Internetowe i uruchom ponownie router przed zmianą ustawień IPTV.
+WANVLAN_port_locked=Sieć VLAN WAN wymaga jednego ręcznie wybranego połączenia WAN bez trybu gotowości USB. Wyłącz 802.1Q w menu WAN > Połączenie Internetowe przed zmianą trybu.
+WANVLAN_help=Skonfiguruj jedną internetową sieć VLAN na ręcznie wybranym porcie 10G WAN lub 2,5G LAN/WAN. Najpierw wyłącz IPTV, AutoWAN, Dual WAN, zapasowe połączenie i tryb gotowości USB, agregację WAN oraz sieci VLAN w sieci LAN. Tryb gotowości ErP jest wstrzymany, gdy sieć VLAN WAN jest włączona. Aby zastąpić ręczny profil IPTV, najpierw go wyłącz i wprowadź tutaj sieć VLAN dostawcy. Zmiana sieci VLAN lub portu wymaga ponownego uruchomienia. Przed przywróceniem profilu IPTV wyłącz sieć VLAN WAN i uruchom ponownie router.
+WANVLAN_apply_failed=Nie można zastosować ustawień, ponieważ weryfikacja sieci VLAN WAN nie powiodła się. Strona zostanie ponownie załadowana. Sprawdź ustawienia i spróbuj ponownie.
 WANAggregation=agregacja WAN
 WANAggregation_desc=Agregacja WAN łączy dwa połączenia sieciowe w celu zwiększenia szybkości WAN do 2Gbps. Połącz port #WAN routera i port LAN 4 z portami LAN modemu (upewnij się, że używane są dwa kable o tej samej specyfikacji). <a id="wanAgg_faq" target="_blank" style="color:#FFCC00;text-decoration:underline;">Agregacja WAN - FAQ</a>
 WANAggregation_enable=Włączenie agregacji WAN
