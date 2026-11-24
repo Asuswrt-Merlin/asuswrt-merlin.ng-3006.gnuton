@@ -1,6 +1,8 @@
 #!/bin/sh
 
-readonly SCRIPT_VERSTAG="25072411"
+# Please increment whenever updater behavior or feed compatibility changes.
+# SCRIPT_VERSTAG format: YYMMDDHH
+readonly SCRIPT_VERSTAG="26112413"
 
 wget_options="-q -t 2 -T 30"
 
