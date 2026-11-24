@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Please increment whenever updater behavior or feed compatibility changes. 
-# Goes by date, year 26, month 11, date 24, hour 13
+# Goes by date, year 26, month 11, day 24, hour 13
 readonly SCRIPT_VERSTAG="26112413"
 
 wget_options="-q -t 2 -T 30"
