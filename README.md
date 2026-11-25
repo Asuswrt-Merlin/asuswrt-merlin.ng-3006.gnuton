@@ -19,6 +19,7 @@ repository.
 | --- | --- |
 | GT-BE98 | Broadcom BCM4916 |
 | RT-BE58U | Broadcom BCM676x |
+| RT-BE58U V2 | Broadcom BCM6764 |
 | RT-BE82U | Broadcom BCM676x |
 | RT-BE82M | Broadcom BCM676x |
 

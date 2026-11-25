@@ -463,10 +463,12 @@ endif
 BINARIES = $(wildcard $(objdir)/binaries/*.bin_headered) 
 PROFILE  = $(shell cat ../.last_profile)
 
-# Model-specific U-Boot prebuilts (GT-BE98 / RT-BE58U / RT-BE82U / RT-BE82M)
+# Model-specific U-Boot prebuilts (GT-BE98 / RT-BE58U / RT-BE58U_V2 / RT-BE82U / RT-BE82M)
 UBOOT_PHY_PREBUILT_DIR := $(mdir)/$(UB)/prebuilt
 ifneq (,$(filter GT-BE98,$(BUILD_NAME)))
 UBOOT_PHY_VARIANT := GT-BE98
+else ifneq (,$(filter RT-BE58U_V2,$(BUILD_NAME)))
+UBOOT_PHY_VARIANT := RT-BE58U_V2
 else ifneq (,$(filter RT-BE58U,$(BUILD_NAME)))
 UBOOT_PHY_VARIANT := RT-BE58U
 else ifneq (,$(filter RT-BE82U,$(BUILD_NAME)))

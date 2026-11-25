@@ -155,7 +155,7 @@ then
 	cp release/src-rt-5.04axhnd.675x/bcmdrivers/broadcom/char/pktrunner/impl2/pktrunner.o $REPO/release/src-rt-5.04axhnd.675x/router-sysdep.$BUILD_NAME_LC/hnd_extra/prebuilt/
 	cp release/src-rt-5.04axhnd.675x/bcmdrivers/broadcom/char/wlcsm_ext/impl1/wlcsm.o $REPO/release/src-rt-5.04axhnd.675x/router-sysdep.$BUILD_NAME_LC/hnd_extra/prebuilt/
 
-elif [ "$BUILD_NAME" == "RT-BE96U" ] || [ "$BUILD_NAME" == "GT-BE98_PRO" ] || [ "$BUILD_NAME" == "RT-BE88U" ] || [ "$BUILD_NAME" == "RT-BE86U" ] || [ "$BUILD_NAME" == "RT-BE92U" ] || [ "$BUILD_NAME" == "RT-BE58_GO" ] || [ "$BUILD_NAME" == "RT-BE58U" ] || [ "$BUILD_NAME" == "RT-BE82U" ] || [ "$BUILD_NAME" == "RT-BE82M" ] || [ "$BUILD_NAME" == "GT-BE19000AI" ] || [ "$BUILD_NAME" == "GT-BE98" ]
+elif [ "$BUILD_NAME" == "RT-BE96U" ] || [ "$BUILD_NAME" == "GT-BE98_PRO" ] || [ "$BUILD_NAME" == "RT-BE88U" ] || [ "$BUILD_NAME" == "RT-BE86U" ] || [ "$BUILD_NAME" == "RT-BE92U" ] || [ "$BUILD_NAME" == "RT-BE58_GO" ] || [ "$BUILD_NAME" == "RT-BE58U" ] || [ "$BUILD_NAME" == "RT-BE58U_V2" ] || [ "$BUILD_NAME" == "RT-BE82U" ] || [ "$BUILD_NAME" == "RT-BE82M" ] || [ "$BUILD_NAME" == "GT-BE19000AI" ] || [ "$BUILD_NAME" == "GT-BE98" ]
 then
         SDK="_4916hnd"
         ARCH="_arm"
@@ -165,12 +165,14 @@ then
 	case "$BUILD_NAME" in
 		GT-BE98|GT-BE98_PRO|RT-BE96U) MODEL_CHIP=6813 ;;
 		RT-BE58U|RT-BE92U|RT-BE95U|TUF-BE3600) MODEL_CHIP=6765 ;;
+		RT-BE58U_V2) MODEL_CHIP=6764 ;;
 		RT-BE82U|RT-BE82M|GT7|GS7_PRO*) MODEL_CHIP=6766 ;;
 		*) MODEL_CHIP="" ;;
 	esac
 	case "$BUILD_NAME" in
 		GT-BE98|GT-BE98_PRO|RT-BE96U) ARCHER_CHIP=6813 ;;
 		RT-BE58U|TUF-BE3600) ARCHER_CHIP=6764L ;;
+		RT-BE58U_V2) ARCHER_CHIP=6764 ;;
 		RT-BE92U|RT-BE95U) ARCHER_CHIP=6765 ;;
 		RT-BE82U|RT-BE82M|GT7|GS7_PRO*) ARCHER_CHIP=6766 ;;
 		*) ARCHER_CHIP="$MODEL_CHIP" ;;
@@ -350,7 +352,7 @@ then
 	then
 		cp release/src-rt-5.04behnd.4916/bcmdrivers/broadcom/net/wl/impl103/main/src/wl/exe/prebuilt/* $REPO/release/src-rt-5.04behnd.4916/bcmdrivers/broadcom/net/wl/impl103/main/src/wl/exe/prebuilt/
 	else
-		if [ "$BUILD_NAME" == "RT-BE58_GO" ]
+		if [ "$BUILD_NAME" == "RT-BE58_GO" ] || [ "$BUILD_NAME" == "RT-BE58U_V2" ]
 		then
 			cp release/src/router/wlexe/wl $REPO/release/src-rt-5.04behnd.4916/bcmdrivers/broadcom/net/wl/impl105/main/src/wl/exe/prebuilt/
 		else
@@ -367,7 +369,7 @@ then
 	cp release/src-rt-5.04behnd.4916/hostTools/prebuilt/mksquashfs $REPO/release/src-rt-5.04behnd.4916/hostTools/prebuilt/
 	cp release/src-rt-5.04behnd.4916/hostTools/prebuilt/ubinize $REPO/release/src-rt-5.04behnd.4916/hostTools/prebuilt/
 
-	if [ "$BUILD_NAME" == "RT-BE58_GO" ]
+	if [ "$BUILD_NAME" == "RT-BE58_GO" ] || [ "$BUILD_NAME" == "RT-BE58U_V2" ]
 	then
 		cp release/src-rt-5.04behnd.4916/bcmdrivers/broadcom/net/wl/impl105/main/components/apps/acsdv2/prebuilt/* $REPO/release/src-rt-5.04behnd.4916/bcmdrivers/broadcom/net/wl/impl105/main/components/apps/acsdv2/prebuilt/$BUILD_NAME/
 		cp release/src-rt-5.04behnd.4916/bcmdrivers/broadcom/net/wl/impl105/main/components/apps/qosmgmt/qosmgmtd $REPO/release/src-rt-5.04behnd.4916/bcmdrivers/broadcom/net/wl/impl105/main/components/apps/qosmgmt/prebuilt/$BUILD_NAME/
@@ -394,7 +396,7 @@ then
 		cp release/src-rt-5.04behnd.4916/kernel/linux-4.19/drivers/char/rtl8372/rtl8372.o $REPO/release/src-rt-5.04behnd.4916/router-sysdep.$BUILD_NAME_LC/hnd_extra/prebuilt/
 	fi
 
-	if [ "$BUILD_NAME" == "RT-BE92U" ] || [ "$BUILD_NAME" == "RT-BE58_GO" ] || [ "$BUILD_NAME" == "RT-BE58U" ] || [ "$BUILD_NAME" == "RT-BE82U" ] || [ "$BUILD_NAME" == "RT-BE82M" ]
+	if [ "$BUILD_NAME" == "RT-BE92U" ] || [ "$BUILD_NAME" == "RT-BE58_GO" ] || [ "$BUILD_NAME" == "RT-BE58U" ] || [ "$BUILD_NAME" == "RT-BE58U_V2" ] || [ "$BUILD_NAME" == "RT-BE82U" ] || [ "$BUILD_NAME" == "RT-BE82M" ]
 	then
 		cp release/src-rt-5.04behnd.4916/bootloaders/u-boot-2019.07/arch/arm/mach-bcmbca/ubus/*.o $REPO/release/src-rt-5.04behnd.4916/bootloaders/obj.$BUILD_NAME_LC/arch/arm/mach-bcmbca/ubus/
 		cp release/src-rt-5.04behnd.4916/bootloaders/u-boot-2019.07/arch/arm/mach-bcmbca/rng/*.o $REPO/release/src-rt-5.04behnd.4916/bootloaders/obj.$BUILD_NAME_LC/arch/arm/mach-bcmbca/rng/
@@ -566,7 +568,7 @@ then
 elif [ "$BUILD_NAME" == "GT-AC2900" ] || [ "$BUILD_NAME" == "GT-AX11000" ] || [ "$BUILD_NAME" == "GT-AXE11000" ] || [ "$BUILD_NAME" == "GT-AX6000" ] || [ "$BUILD_NAME" == "GT-AXE16000" ] || [ "$BUILD_NAME" == "GT-AX11000_PRO" ]
 then
     cp release/src/router/aura_sw/prebuild/* $REPO/release/src/router/aura_sw/prebuild/$BUILD_NAME/
-elif [ "$BUILD_NAME" == "GT-BE98" ]  || [ "$BUILD_NAME" == "RT-BE98_PRO" ] || [ "$BUILD_NAME" == "RT-BE58_GO" ] || [ "$BUILD_NAME" == "RT-BE58U" ] || [ "$BUILD_NAME" == "RT-BE82U" ] || [ "$BUILD_NAME" == "RT-BE82M" ] || [ "$BUILD_NAME" == "RT-BE92U" ] || [ "$BUILD_NAME" == "RT-BE96U" ]
+elif [ "$BUILD_NAME" == "GT-BE98" ]  || [ "$BUILD_NAME" == "RT-BE98_PRO" ] || [ "$BUILD_NAME" == "RT-BE58_GO" ] || [ "$BUILD_NAME" == "RT-BE58U" ] || [ "$BUILD_NAME" == "RT-BE58U_V2" ] || [ "$BUILD_NAME" == "RT-BE82U" ] || [ "$BUILD_NAME" == "RT-BE82M" ] || [ "$BUILD_NAME" == "RT-BE92U" ] || [ "$BUILD_NAME" == "RT-BE96U" ]
 then
 	cp release/src/router/nmp-api/networkmap/prebuild/* $REPO/release/src/router/nmp-api/networkmap/prebuild/$BUILD_NAME/
 fi

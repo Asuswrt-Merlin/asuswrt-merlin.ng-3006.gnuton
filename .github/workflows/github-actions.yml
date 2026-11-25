@@ -43,6 +43,7 @@ jobs:
               '{"model":"gt-be98","sdk":"src-rt-5.04behnd.4916","ui":"default","skip":false}'
               '{"model":"gt-be98","sdk":"src-rt-5.04behnd.4916","ui":"rog","skip":false}'
               '{"model":"rt-be58u","sdk":"src-rt-5.04behnd.4916","ui":"default","skip":false}'
+              '{"model":"rt-be58u_v2","sdk":"src-rt-5.04behnd.4916","ui":"default","skip":false}'
               '{"model":"rt-be82u","sdk":"src-rt-5.04behnd.4916","ui":"default","skip":false}'
               '{"model":"rt-be82m","sdk":"src-rt-5.04behnd.4916","ui":"default","skip":false}'
             )
@@ -56,7 +57,7 @@ jobs:
                 fi
               done
               if [ "${#selected[@]}" -eq 0 ]; then
-                echo "::error::Unknown model '${REQUESTED_MODEL}'. Valid values: gt-be98, rt-be58u, rt-be82u, rt-be82m."
+                echo "::error::Unknown model '${REQUESTED_MODEL}'. Valid values: gt-be98, rt-be58u, rt-be58u_v2, rt-be82u, rt-be82m."
                 exit 1
               fi
               entries=("${selected[@]}")

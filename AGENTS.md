@@ -15,6 +15,7 @@ is the **3004** line and must not be modified as part of work in this repo.
 ## Supported Models (via GitHub Actions)
 - `gt-be98` (GT-BE98, default and ROG UI)
 - `rt-be58u` (RT-BE58U)
+- `rt-be58u_v2` (RT-BE58U V2)
 - `rt-be82u` (RT-BE82U)
 - `rt-be82m` (RT-BE82M)
 
