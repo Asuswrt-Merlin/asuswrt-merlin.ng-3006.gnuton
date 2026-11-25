@@ -4,11 +4,11 @@ TOPDIR  := $(shell /bin/pwd)
 default:
 
 $(MAKECMDGOALS):
-	-cp prebuilt/mksquashfs ./mksquashfs
+	-if [ -f prebuilt/$(BUILD_NAME)/mksquashfs ]; then cp prebuilt/$(BUILD_NAME)/mksquashfs ./mksquashfs; else cp prebuilt/mksquashfs ./mksquashfs; fi
 	mkdir -p mtd-utils-2.0.2
 	ln -sf mtd-utils-2.0.2 mtd-utils
-	-cp prebuilt/mkfs.ubifs mtd-utils/
-	-cp prebuilt/ubinize mtd-utils/
+	-if [ -f prebuilt/$(BUILD_NAME)/mkfs.ubifs ]; then cp prebuilt/$(BUILD_NAME)/mkfs.ubifs mtd-utils/; else cp prebuilt/mkfs.ubifs mtd-utils/; fi
+	-if [ -f prebuilt/$(BUILD_NAME)/ubinize ]; then cp prebuilt/$(BUILD_NAME)/ubinize mtd-utils/; else cp prebuilt/ubinize mtd-utils/; fi
 	mkdir -p local_install
 	-cp prebuilt/$(BUILD_NAME)/lzop local_install/
 	-cp prebuilt/make_ext4fs local_install/
