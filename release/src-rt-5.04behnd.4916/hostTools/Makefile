@@ -12,7 +12,7 @@ $(MAKECMDGOALS):
 	mkdir -p local_install
 	-cp prebuilt/$(BUILD_NAME)/lzop local_install/
 	-cp prebuilt/make_ext4fs local_install/
-	-cp prebuilt/cmplzma ./cmplzma
+	-if [ -f prebuilt/$(BUILD_NAME)/cmplzma ]; then cp prebuilt/$(BUILD_NAME)/cmplzma ./cmplzma; else cp prebuilt/cmplzma ./cmplzma; fi
 	-cp prebuilt/lzmacmd ./lzmacmd
 	mkdir -p prelink/src
 	-cp prebuilt/execstack ./prelink/src/execstack

@@ -1,0 +1,32 @@
+#!/bin/sh
+# CI-compatible cmplzma replacement for RT-BE58U_V2.
+# Usage: cmplzma -k -2 -lzma <elf> <bin> <out>
+set -e
+out=""
+bin=""
+for a in "$@"; do
+  case "$a" in
+    -*) ;;
+    *) bin="$out"; out="$a" ;;
+  esac
+done
+# last two positional args are bin and out
+# Reparse properly: collect positional args
+pos=""
+for a in "$@"; do
+  case "$a" in -*) ;; *) pos="$pos $a" ;; esac
+done
+set -- $pos
+if [ "$#" -lt 2 ]; then echo "cmplzma: bad args: $*" >&2; exit 1; fi
+# bin is second-to-last, out is last
+eval out=\${$#}
+eval bin=\${$(($#-1))}
+python3 -c '
+import sys, lzma, struct
+bin_path, out_path = sys.argv[1], sys.argv[2]
+data = open(bin_path,"rb").read()
+# LZMA-alone format, preset roughly matching -d22 -lp2 -lc1
+c = lzma.LZMACompressor(format=lzma.FORMAT_ALONE, filters=[{"id":lzma.FILTER_LZMA1,"dict_size":1<<22,"lp":2,"lc":1}])
+comp = c.compress(data) + c.flush()
+open(out_path,"wb").write(comp)
+' "$bin" "$out"
