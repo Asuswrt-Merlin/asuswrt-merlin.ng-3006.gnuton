@@ -40,12 +40,13 @@ jobs:
           run: |
             set -euo pipefail
             entries=(
-              '{"model":"gt-be98","sdk":"src-rt-5.04behnd.4916","ui":"default","skip":false}'
-              '{"model":"gt-be98","sdk":"src-rt-5.04behnd.4916","ui":"rog","skip":false}'
-              '{"model":"rt-be58u","sdk":"src-rt-5.04behnd.4916","ui":"default","skip":false}'
+              # Temporarily build only RT-BE58U_V2; restore full matrix before merge.
+              # '{"model":"gt-be98","sdk":"src-rt-5.04behnd.4916","ui":"default","skip":false}'
+              # '{"model":"gt-be98","sdk":"src-rt-5.04behnd.4916","ui":"rog","skip":false}'
+              # '{"model":"rt-be58u","sdk":"src-rt-5.04behnd.4916","ui":"default","skip":false}'
               '{"model":"rt-be58u_v2","sdk":"src-rt-5.04behnd.4916","ui":"default","skip":false}'
-              '{"model":"rt-be82u","sdk":"src-rt-5.04behnd.4916","ui":"default","skip":false}'
-              '{"model":"rt-be82m","sdk":"src-rt-5.04behnd.4916","ui":"default","skip":false}'
+              # '{"model":"rt-be82u","sdk":"src-rt-5.04behnd.4916","ui":"default","skip":false}'
+              # '{"model":"rt-be82m","sdk":"src-rt-5.04behnd.4916","ui":"default","skip":false}'
             )
 
             model="${REQUESTED_MODEL,,}"
