@@ -139,6 +139,8 @@ TOOLCHAIN_LIBS32 := $(shell for j in $(EXP_TOOLCHAIN_LIBS32); do find -L $(TOOLC
 # Determine which libs are missing
 MISSING_LIBS32 := $(shell for j in $(EXP_TOOLCHAIN_LIBS32); do if test -n "$$(find -L $(TOOLCHAIN_TOP) -name $$j)" \
                            ; then echo ""; else echo $$j; fi; done;)
+# libssl.so.1.0.0 may be referenced by prebuilts but absent in modern toolchains
+MISSING_LIBS32 := $(filter-out libssl.so.1.0.0,$(MISSING_LIBS32))
 
 # If linker was not found, add to list of missing libs
 ifeq ($(TOOLCHAIN_LINKER32),)
@@ -200,6 +202,7 @@ TOOLCHAIN_LIBS64 := $(shell for j in $(EXP_TOOLCHAIN_LIBS64); do find -L $(TOOLC
 # Determine which libs are missing
 MISSING_LIBS64 := $(shell for j in $(EXP_TOOLCHAIN_LIBS64); do if test -n "$$(find -L $(TOOLCHAIN_TOP) -name $$j)" \
                            ; then echo ""; else echo $$j; fi; done;)
+MISSING_LIBS64 := $(filter-out libssl.so.1.0.0,$(MISSING_LIBS64))
 
 # If linker was not found, add to list of missing libs
 ifeq ($(TOOLCHAIN_LINKER64),)
