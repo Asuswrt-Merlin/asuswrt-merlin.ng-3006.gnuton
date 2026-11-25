@@ -301,6 +301,28 @@ int trxbus_module_read_raw(int bus, int addr, int offset, uint8_t *data, int len
 }
 EXPORT_SYMBOL(trxbus_module_read_raw);
 
+int trxbus_module_eeprom(int bus, struct ethtool_eeprom *ee, u8 *data)
+{
+    if (bus < 0 || bus >= ARRAY_SIZE(bus_to_sfp))
+    {
+        printk("TRXBUS: bus %d is not valid\n", bus);
+        return -1;
+    }
+    return -1;
+}
+EXPORT_SYMBOL(trxbus_module_eeprom);
+
+int trxbus_module_info(int bus, struct ethtool_modinfo *modinfo)
+{
+    if (bus < 0 || bus >= ARRAY_SIZE(bus_to_sfp))
+    {
+        printk("TRXBUS: bus %d is not valid\n", bus);
+        return -1;
+    }
+    return -1;
+}
+EXPORT_SYMBOL(trxbus_module_info);
+
 int trxbus_mon_read(int bus, enum bcmsfp_mon_attr attr, int channel, long *value)
 {
     struct bus_to_sfp_t *b = &bus_to_sfp[bus];
