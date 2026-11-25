@@ -9982,7 +9982,7 @@ void onboarding_check()
 		lock = file_lock("onboarding");
 		if (strlen(nvram_safe_get("cfg_group")) == 0) {
 			stop_cfgsync();
-#ifndef RTCONFIG_BE58U_V2
+#ifndef RTBE58U_V2
 			backup_eth_ob_log();
 #endif
 			notify_rc("resetdefault");

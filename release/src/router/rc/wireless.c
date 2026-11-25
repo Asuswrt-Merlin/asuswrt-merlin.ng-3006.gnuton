@@ -396,7 +396,7 @@ int wlcscan_main(void)
 		if (!nvram_get_int("escan_dis") && !nvram_match(strcat_r(prefix, "mode", tmp), "wds"))
 #if defined(RPAX58) || defined(RPBE58) || defined(RTBE58_GO)
 			wlcscan_core_escan(apscan_file, word);
-#elif defined(RTCONFIG_BE58U_V2)
+#elif defined(RTBE58U_V2)
 			wlcscan_core(APSCAN_INFO, word);
 #else
 			wlcscan_core_escan(APSCAN_INFO, word);
