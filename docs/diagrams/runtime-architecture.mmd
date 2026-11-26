@@ -1,0 +1,83 @@
+flowchart LR
+    USER["Admin/User Browser"]
+    EXT["External Services\nASUS/Merlin update feed,\nDDNS, cloud, NTP, VPN peers,\nUSB/mobile/storage devices"]
+
+    subgraph FW["Router Firmware Runtime (on device)"]
+        subgraph UI["Web Management Plane"]
+            WWW["Web UI Assets\nrelease/src/router/www/\n*.asp, js/, css/, images/\naimesh/, dashboard/\nsysdep/<MODEL>/"]
+            HTTPD["Embedded HTTPD/Backend\nrelease/src/router/httpd/\nhttpd.c, cgi.c, ej.c,\nnvram_f.c, sysdeps/"]
+            WEBAPI["Web/API Helpers\nlibwebapi/, asuswebstorage/\nwebdav_client/, rom/webs_scripts/"]
+        end
+
+        subgraph CTRL["Control / Configuration Plane"]
+            RC["rc/init Orchestrator\nrelease/src/router/rc/\nrc.c, service startup,\nnetwork/firewall/wireless/usb,\nwatchdogs, buttons/LEDs, events"]
+            NVRAM["NVRAM Config Store\nrelease/src/router/nvram/\nnvram.c, nvram_linux.c,\nnvram_convert.c"]
+            SHARED["Shared Libraries/Utils\nrelease/src/router/shared/\nboardapi, common utils,\nnvram wrappers, bcm utils,\nevent/IPC helpers"]
+            ROMFS["ROMFS / Defaults / Scripts\nrelease/src/router/rom/\nwebs_scripts/, certs, defaults,\napps_scripts/, prebuilt data"]
+        end
+
+        subgraph NET["Networking & Security Services"]
+            NETCORE["Network Core\nbridge/bridge-utils, vlan,\niproute2, ethtool, conntrack"]
+            DHCPDNS["DHCP/DNS\ndnsmasq, udhcpd/dhcpfwd,\ndns_ping, stubby/DNS privacy"]
+            WAN["WAN/PPP/Tunnel\npppd, rp-pppoe, pptp-client,\nxl2tpd/l2tp, 6relayd, odhcp6c"]
+            FWALL["Firewall/NAT/QoS\niptables/ipset/ebtables,\nrc firewall logic, tc/qos,\ntraffic monitor/rstats"]
+            VPN["VPN/Security\nOpenVPN, StrongSwan/IPsec,\nWireGuard, OpenSSL, easy-rsa,\nacme.sh/LETSENCRYPT"]
+            DPI["DPI/Parental/Protection\nbwdpi_source, urlfilterd,\nprotect_srv, AiProtection hooks"]
+        end
+
+        subgraph WLAN["Wireless / AiMesh"]
+            WLCTRL["WiFi Control\nwlceventd, wlc_nt, wps/wsc,\n802.1x/eapd, bsd"]
+            AMAS["AiMesh/Roaming\namas-utils, mapd, asd/asd2.1,\nsteering/mesh policy"]
+            WLDRV["Broadcom WL Drivers/SDK\nbcmdrivers/.../net/wl,\nshared wl interfaces, dhd"]
+        end
+
+        subgraph SYS["System / Platform Services"]
+            USB["USB/Storage/Sharing\nusbclient/modeswitch, udev,\nntfs/tuxera/e2fs/dosfstools,\nsamba/vsftpd/lighttpd/minidlna/nfs"]
+            DISC["Discovery/UPnP/mDNS\navahi, mDNSResponder,\nminiupnpd, lldpd, networkmap"]
+            MISC["Utilities/Daemons\nbusybox, syslog, ntpclient,\ncron/sched, sysstate,\naura LED, nt_center, infosvr"]
+        end
+
+        subgraph KERNEL["Kernel / Platform Layer"]
+            LINUX["Linux Kernel\nsrc-rt-5.04behnd.4916/kernel/\nlinux-4.19, bcmkernel, dts"]
+            BRCMDRV["Broadcom Platform Drivers\nbcmdrivers/, shared/, rdp/,\nethernet/switch/accelerator"]
+            BOOT["Boot/Platform\nbootloaders/CFE/TF-A,\ntargets/<PROFILE>, hostTools outputs"]
+        end
+    end
+
+    USER <--> HTTPD
+    HTTPD --> WWW
+    HTTPD --> WEBAPI
+    HTTPD <--> NVRAM
+    HTTPD --> RC
+
+    RC <--> NVRAM
+    RC <--> SHARED
+    RC --> ROMFS
+    RC --> NETCORE
+    RC --> DHCPDNS
+    RC --> WAN
+    RC --> FWALL
+    RC --> VPN
+    RC --> DPI
+    RC --> WLCTRL
+    RC --> AMAS
+    RC --> USB
+    RC --> DISC
+    RC --> MISC
+
+    WLCTRL <--> NVRAM
+    AMAS <--> NVRAM
+    NETCORE --> LINUX
+    FWALL --> LINUX
+    WLCTRL --> WLDRV
+    AMAS --> WLDRV
+    WLDRV --> BRCMDRV
+    BRCMDRV --> LINUX
+    USB --> LINUX
+    DISC --> NETCORE
+    MISC --> SHARED
+    BOOT --> LINUX
+    EXT <--> WAN
+    EXT <--> WEBAPI
+    EXT <--> VPN
+    EXT <--> USB

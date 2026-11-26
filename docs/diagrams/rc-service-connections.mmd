@@ -1,0 +1,31 @@
+flowchart TB
+    INIT["init/rc boot\ninit.c / rc.c"] --> SS["start_services()\nservices.c"]
+    INIT --> LAN["start_lan()\nlan.c"]
+    INIT --> WAN["start_wan() / start_wan_if()\nwan.c"]
+    INIT --> USB["start_usb()\nusb.c"]
+    INIT --> WL["start_wl() / start_wireless()\nlan.c/rc"]
+    INIT --> FW["start_firewall()\nfirewall.c"]
+    INIT --> JFFS["start_jffs2()/start_ubifs()\njffs2.c/ubifs.c"]
+
+    SS --> CORE["Core/System\nsyslogd/klogd/logger\nhotplug2, cron, ntpc/ntpd\nwatchdogs, tempsense, ledg/ledbtn"]
+    SS --> NETSVC["Network Services\ndnsmasq, stubby, httpd, upnp\nnetworkmap, wanduck/mtwanduck\nsnmpd, sshd, telnetd, lld/avahi"]
+    SS --> WLSVC["Wireless Services\neapd, nas/wpa, wlceventd\nbsd, asd, amas*, roamast\nwps, dcsd/acsd, wlc_monitor"]
+    SS --> SECSVC["Security/VPN/DPI\nopenvpn/vpnc/wireguard hooks\nbwdpi/DPI checks, firewall helpers\nletsencrypt, conn_diag, keyguard"]
+    SS --> USBSVC["USB/App Services\nnas_services, samba, ftpd\nminidlna/DMS, webdav, timemachine\nusb_idle, diskmon"]
+    SS --> FEAT["Feature Daemons\naura RGB, AiCloud/awsiot\naae/mastiff/natnl, infosvr\nnotification_center, sysstate"]
+
+    LAN --> BR["Bridge/VLAN/LAN IF\nstart_vlan, start_lan_port\nstart_lan_wl, DHCP/DNS reload"]
+    WAN --> WANIF["WAN interface bringup\nstart_wan_if, DHCP/PPPoE/USB modem\nstart_wan6, 6relayd/dhcp6c/rdisc6"]
+    WAN --> WANFEAT["WAN features\nVPN client/server hooks\nQoS, firewall, DDNS, upnp, routes"]
+    USB --> NAS["NAS/App stack\nstart_nas_services\nstart_samba/start_ftpd/start_dms\nstart_webdav/start_timemachine"]
+
+    NVRAM["NVRAM\nnvram/* shared/*"] <--> SS
+    NVRAM <--> LAN
+    NVRAM <--> WAN
+    NVRAM <--> HTTPD["httpd CGI/ASP\nhttpd/* www/*"]
+    HTTPD -->|apply/restart| SS
+    HTTPD -->|rc service actions| RCMD["rc rc_service / notify_rc"]
+    RCMD --> SS
+    RCMD --> LAN
+    RCMD --> WAN
+    RCMD --> FW

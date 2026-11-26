@@ -1,0 +1,49 @@
+flowchart TB
+    DEV["Developer / Tag / Manual Dispatch"]
+    GH["GitHub Actions\n.github/workflows/github-actions.yml"]
+
+    subgraph PREP["prepare-job"]
+        MATRIX["Select matrix\nmodel/sdk/ui\nvalidate workflow_dispatch model"]
+    end
+
+    subgraph BUILD["build-job (container: gnuton/asuswrt-merlin-toolchains-docker)"]
+        CLONE["Clone repo into /project/repo"]
+        VER["Tag build: patch release/src-rt/version.conf\nSERIALNO / EXTENDNO"]
+        NOTES["Default UI: tools/get-last-notes.py\n-> CHANGELOG"]
+        ENV["Source SDK toolchain env\nBE 4916: bcm-hnd-ax-4.19be_soft.sh"]
+        UI["Optional UI toggle\nrelease/src-rt/target.mak\nROG_UI / TUF_UI"]
+        MAKE["cd release/${SDK}\nmake ${MODEL}"]
+        ART["Collect artifacts\n*.w, *.squashfs.pkgtb, *.md5,\nCHANGELOG"]
+    end
+
+    subgraph SDKBUILD["SDK Build Orchestration"]
+        SDKMK["release/src-rt-5.04behnd.4916/Makefile\nprofile/chip/target detection\nall/image/clean targets"]
+        RTCONF["release/src-rt/target.mak + version.conf\nmodel feature flags, version"]
+        ROUTERMK["release/src/router/Makefile\nuserland component build/install"]
+        SYSDEP["targets/<PROFILE>\nrouter-sysdep/<model>\nprebuilt/model overlays"]
+        KERNEL["kernel/linux-4.19 + bcmdrivers\nbootloaders + hostTools + userspace"]
+        PACK["Image packaging\nbtools/lzma/asustools/hostTools\nTRX/W/PKGTB generation"]
+    end
+
+    subgraph REL["Tag-only Release Jobs"]
+        RELEASE["release-job\ncreate draft GitHub release\nattach artifacts"]
+        MANIFEST["manifest-job (stable tags)\nupdate updates/manifest_3006.txt\ncopy versioned *_note.txt\npush to master"]
+    end
+
+    FEED["Firmware Update Feed\nraw.githubusercontent.com/.../updates/\nmanifest_3006.txt + release notes"]
+    ROUTERUPD["On-router updater\nrom/webs_scripts/merlin_webs_update.sh\nreads manifest/note from feed"]
+
+    DEV --> GH --> PREP --> BUILD
+    CLONE --> VER --> NOTES --> ENV --> UI --> MAKE --> ART
+    MAKE --> SDKMK
+    SDKMK --> RTCONF
+    SDKMK --> ROUTERMK
+    SDKMK --> SYSDEP
+    SDKMK --> KERNEL
+    ROUTERMK --> PACK
+    KERNEL --> PACK
+    ART --> RELEASE
+    ART --> MANIFEST
+    RELEASE --> FEED
+    MANIFEST --> FEED
+    FEED --> ROUTERUPD

@@ -1,0 +1,26 @@
+flowchart TB
+    subgraph REPO["Repository / Source of Truth"]
+        DOCS["Docs & Metadata\nAGENTS.md, README*, Changelog-3006.txt\nLicense, SUPPORT.md"]
+        TOOLS["Repo Tools\ntools/\n- get-last-notes.py\n- copy-prebuilt*\n- make-model-prebuild.sh\n- make-www-sysdep.sh\n- bootloaders-copy.sh"]
+        UPDATES["Update Feed\nupdates/\n- manifest_3006.txt\n- 3006_*_note.txt"]
+        CI["CI/CD\n.github/workflows/github-actions.yml"]
+        SRC["Firmware Source\nrelease/"]
+    end
+
+    subgraph SRC_TREE["release/ Source Tree"]
+        SRC_COMMON["release/src/\nCommon userland/build helpers\nrouter/, btools/, ctools/, lzma*,\nasustools/, shared libs/tools"]
+        SRC_RT_SHARED["release/src-rt/\nShared RT config/fragments\ntarget.mak, version.conf,\nplatform.mak, profile*.mak"]
+        SDK_BE["release/src-rt-5.04behnd.4916/\nPrimary BE SDK (CI)\nkernel, bcmdrivers, bootloaders,\nhostTools, targets, userspace,\nrouter-sysdep*, make*.mak"]
+        SDK_OTHER["Other SDK trees\nsrc-rt-5.02axhnd*\nsrc-rt-5.04axhnd.675x\n(legacy/other platform baselines)"]
+        IMG["release/image/\nImage output area"]
+    end
+
+    CI -->|builds model matrix| SDK_BE
+    CI -->|reads/writes version/feed metadata| SRC_RT_SHARED
+    CI -->|publishes release assets + manifest| UPDATES
+    TOOLS --> CI
+    SRC --> SRC_COMMON
+    SRC --> SRC_RT_SHARED
+    SRC --> SDK_BE
+    SRC --> SDK_OTHER
+    SRC --> IMG
