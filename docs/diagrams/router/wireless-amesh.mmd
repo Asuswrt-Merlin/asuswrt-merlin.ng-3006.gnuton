@@ -1,4 +1,7 @@
 flowchart LR
+    classDef proprietary fill:#fff5f5,stroke:#c92a2a,stroke-width:2px,color:#111;
+    classDef external fill:#f8f9fa,stroke:#495057,color:#111;
+
     RC["rc / wireless.c / services.c\nWireless service orchestrator"]
     NVRAM["NVRAM config bus\nwl*, amas_*, wps_*, hapd_*, ssid/security/channel keys"]
 
@@ -6,20 +9,21 @@ flowchart LR
         EAP["802.1x rtdot1xd\nRT_WIFI 802.1X authenticator/RADIUS relay"]
         WPA["wpa_supplicant/wpa_cli\nWPA/802.1X supplicant"]
         WPS["wsc_upnp / wpsaide / wps-broadcom\nWPS UPnP/control helpers"]
-        WLEV["wlceventd (prebuilt)\nBroadcom wireless event daemon"]
-        WLCNT["wlc_nt/wlc_monitor (prebuilt)\nWireless notification/monitor"]
+        WLEV["wlceventd\nBroadcom wireless event daemon"]:::proprietary
+        WLCNT["wlc_nt/wlc_monitor\nWireless notification/monitor"]:::proprietary
     end
 
     subgraph MESH["AiMesh / Steering"]
-        AMAS["amas-utils + AMAS services\nAiMesh library/orchestration\nbhctrl/lanctrl/ssd/status/misc"]
-        BSD["bsd (prebuilt)\nBroadcom Band Steering Daemon"]
+        AMAS["amas-utils + AMAS services\nAiMesh library/orchestration\nbhctrl/lanctrl/ssd/status/misc"]:::proprietary
+        BSD["bsd\nBroadcom Band Steering Daemon"]:::proprietary
         MAPD["mapd\nMediatek MAP/EasyMesh 1905+WAPP"]
-        ASD["asd / asd2.1 (prebuilt)\nASUS feature/security daemon"]
-        AAE["aaews/mastiff/aaeuac (prebuilt)\nAAE/AiCloud service"]
+        ASD["asd / asd2.1\nASUS feature/security daemon"]:::proprietary
+        AAE["aaews/mastiff/aaeuac\nAAE/AiCloud service"]:::proprietary
     end
 
-    WLDRV["Broadcom/RT_WIFI driver stack\nwl/dhd/ioctl/netlink/events"]
-    KERN["Kernel / netlink / ioctl"]
+    WLDRV["Broadcom/RT_WIFI driver stack\nwl/dhd/ioctl/netlink/events"]:::proprietary
+    KERN["Kernel / netlink / ioctl"]:::external
+    EXT["External RADIUS / clients"]:::external
 
     RC -->|"start/stop/restart notify_rc, signals"| EAP
     RC -->|"start_hapd_wpasupp / stop_wpa_supplicant"| WPA
@@ -40,10 +44,10 @@ flowchart LR
     AMAS <-->|"amas_* service-ready/bdl keys"| NVRAM
     BSD -->|"wl/wlcsm band-steering policy/control"| WLDRV
     MAPD -->|"1905/WAPP/dot11 interfaces, /etc/map*"| WLDRV
-    ASD -->|"libasd.so plugin API (prebuilt)"| RC
+    ASD -->|"libasd.so plugin API"| RC
     AAE -->|"Unix IPC /var/run/aaews_ipc_socket"| RC
 
     RC <-->|"reads/writes wl/amas/wps/hapd config"| NVRAM
     WLDRV -->|"ioctl/netlink/driver events"| KERN
-    EAP -->|"RADIUS UDP auth packets"| EXT["External RADIUS / clients"]
+    EAP -->|"RADIUS UDP auth packets"| EXT
     WPA -->|"802.1X/EAPOL authentication"| EXT

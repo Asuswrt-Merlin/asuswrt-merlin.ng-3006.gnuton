@@ -1,19 +1,22 @@
 flowchart LR
-    ADMIN["Admin Browser\nUI/operator"]
+    classDef proprietary fill:#fff5f5,stroke:#c92a2a,stroke-width:2px,color:#111;
+    classDef external fill:#f8f9fa,stroke:#495057,color:#111;
+
+    ADMIN["Admin Browser\nUI/operator"]:::external
     HTTPD["httpd\nEmbedded web admin server\nCGI/ASP/EJ, auth, config pages"]
     WWW["www/\nASP/HTML/JS UI assets"]
     RC["rc\nInit/service orchestrator\nboot, lifecycle, apply config"]
     NVRAM["nvram/libnvram\nPersistent key-value config store\n/dev/nvram ioctl+mmap"]
-    SHARED["shared/libshared\nCommon helpers\nnvram wrappers, notify_rc, pid/signal utils"]
-    CFG["cfg_mnt\nAiMesh config sync/management\ncfg_server/client/reportstatus"]
+    SHARED["shared/libshared\nCommon helpers\nnvram wrappers, notify_rc, pid/signal utils"]:::proprietary
+    CFG["cfg_mnt\nAiMesh config sync/management\ncfg_server/client/reportstatus"]:::proprietary
     NTC["nt_center\nNotification Center\nevent storage/push/mail"]
-    NMAP["networkmap\nClient discovery/topology\nasusdiscovery/arpstorm"]
+    NMAP["networkmap\nClient discovery/topology\nasusdiscovery/arpstorm"]:::proprietary
     INF["infosvr\nASUS device discovery responder"]
-    SYS["sysstate\nSystem state/log helpers\nsysstate/asuslog (prebuilt)"]
-    EVT["eventd\nEvent daemon (prebuilt)"]
-    ARBD["asus_rbd\nRouter Boost daemon (prebuilt)"]
+    SYS["sysstate\nSystem state/log helpers\nsysstate/asuslog"]:::proprietary
+    EVT["eventd\nEvent daemon"]:::proprietary
+    ARBD["asus_rbd\nRouter Boost daemon"]:::proprietary
     ROM["rom/\nROMFS defaults/scripts/certs"]
-    KERN["Kernel/proc/sysfs/dev\nplatform services"]
+    KERN["Kernel/proc/sysfs/dev\nplatform services"]:::external
 
     ADMIN -->|"HTTP/HTTPS config/status requests"| HTTPD
     HTTPD -->|"serves UI templates/assets"| WWW
@@ -22,13 +25,13 @@ flowchart LR
     RC -->|"reads/writes config state"| NVRAM
     RC -->|"uses shared APIs/helpers"| SHARED
     RC -->|"loads defaults/scripts/certs"| ROM
-    RC -->|"start/stop/manage daemons"| CFG
-    RC -->|"start/stop/manage daemons"| NTC
-    RC -->|"start/stop/manage daemons"| NMAP
-    RC -->|"start/stop/manage daemons"| INF
-    RC -->|"start/stop/manage daemons"| SYS
-    RC -->|"start/stop/manage daemons"| EVT
-    RC -->|"start/stop/manage daemons"| ARBD
+    RC -->|"start/stop/manage daemon"| CFG
+    RC -->|"start/stop/manage daemon"| NTC
+    RC -->|"start/stop/manage daemon"| NMAP
+    RC -->|"start/stop/manage daemon"| INF
+    RC -->|"start/stop/manage daemon"| SYS
+    RC -->|"start/stop/manage daemon"| EVT
+    RC -->|"start/stop/manage daemon"| ARBD
     CFG <-->|"Unix IPC /var/run/cfgmnt_ipc_socket\nJSON config/event sync"| RC
     CFG <-->|"reads/writes config/state"| NVRAM
     NTC <-->|"event socket send_notify_event/socketpath"| RC
@@ -36,8 +39,8 @@ flowchart LR
     NMAP <-->|"reads/writes discovery/config state"| NVRAM
     INF -->|"UDP discovery responses port 9999"| ADMIN
     INF <-->|"reads identity/network config"| NVRAM
-    SYS <-->|"status/log data, respipc (prebuilt)"| RC
-    EVT <-->|"event bus (prebuilt)"| RC
+    SYS <-->|"status/log data, respipc"| RC
+    EVT <-->|"event bus"| RC
     ARBD <-->|"RouterBoost/AiMesh/QoS state"| NVRAM
     NVRAM <-->|"ioctl+mmap NVRAM_MAGIC"| KERN
     SHARED -->|"notify_rc API, pid/signal/file lock helpers"| RC

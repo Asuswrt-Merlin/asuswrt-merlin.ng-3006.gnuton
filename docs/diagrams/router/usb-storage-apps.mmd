@@ -1,12 +1,16 @@
 flowchart TB
+    classDef proprietary fill:#fff5f5,stroke:#c92a2a,stroke-width:2px,color:#111;
+    classDef external fill:#f8f9fa,stroke:#495057,color:#111;
+
     RC["rc/usb.c + services.c\nUSB/storage/app orchestrator"]
     NVRAM["NVRAM config bus\nusb_*, enable_ftp/samba/nfsd, dms_*, st_*_mode, acc_*, timemachine_*"]
     HOT["hotplug2 / udev\nHotplug event handlers"]
-    KERN["Kernel / sysfs / block / USB / FUSE / nfsd"]
+    KERN["Kernel / sysfs / block / USB / FUSE / nfsd"]:::external
 
     subgraph STORAGE["Storage / Disk"]
         LIBDISK["libdisk\nDisk init/mount/share/account/config generation"]
-        FS["ntfs-3g / tuxera / e2fsprogs / diskdev_cmds / mtd-utils\nFilesystem and disk tools"]
+        FS["ntfs-3g / e2fsprogs / diskdev_cmds / mtd-utils\nOpen-source filesystem and disk tools"]
+        TUX["tuxera\nProprietary filesystem stack"]:::proprietary
     end
 
     subgraph FILE["File / Media Sharing"]
@@ -19,8 +23,10 @@ flowchart TB
     end
 
     subgraph CLOUD["Cloud / USB Apps"]
-        AWS["asuswebstorage / dropbox_client / ftpclient\nCloud/transfer clients"]
-        USBM["usb-modeswitch / usbmode / usbclient\nUSB modem/mode/client utilities"]
+        AWS["asuswebstorage\nASUS WebStorage client"]
+        DROP["dropbox_client\nDropbox sync client"]:::proprietary
+        USBM["usb-modeswitch / usbmode\nUSB modem/mode utilities"]
+        USBC["usbclient\nASUS USB client utility"]:::proprietary
         PRINT["LPRng\nLPD/USB printer sharing"]
     end
 
@@ -31,8 +37,10 @@ flowchart TB
     RC -->|"start/stop/rebuild/rescan DMS"| DLNA
     RC -->|"start/stop WebDAV"| WDAV
     RC -->|"start/stop timemachine/afpd"| TM
-    RC -->|"start/stop cloud/usb helpers"| AWS
+    RC -->|"start/stop cloud helpers"| AWS
+    RC -->|"start/stop cloud helpers"| DROP
     RC -->|"invoke mode switch/client tools"| USBM
+    RC -->|"invoke USB client utility"| USBC
     RC -->|"manage printer/LPD state"| PRINT
 
     HOT -->|"netlink uevents -> rule actions"| RC
@@ -40,6 +48,7 @@ flowchart TB
     LIBDISK -->|"generates account/share metadata"| FTP
     LIBDISK -->|"disk/share state files in /tmp/jffs"| RC
     FS -->|"mount/mkfs/fsck CLI, FUSE/modules"| KERN
+    TUX -->|"proprietary mount/fs modules"| KERN
     NFS -->|"rpc.nfsd/exportfs, /proc/fs/nfsd, /etc/exports"| KERN
     SMB <-->|"reads enable_samba/st_samba/acc_* keys"| NVRAM
     FTP <-->|"reads enable_ftp/st_ftp/acc_* keys"| NVRAM
@@ -49,4 +58,3 @@ flowchart TB
     PRINT <-->|"reads lprng_*/MFP_busy/u2ec_busyip/lan_ipaddr"| NVRAM
     LIBDISK <-->|"reads acc_*/usb path/fs keys"| NVRAM
     RC <-->|"reads/writes usb/storage/service config"| NVRAM
-    STORAGE -->|"block/device/sysfs/mount operations"| KERN

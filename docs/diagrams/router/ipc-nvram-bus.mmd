@@ -1,4 +1,7 @@
 flowchart TB
+    classDef proprietary fill:#fff5f5,stroke:#c92a2a,stroke-width:2px,color:#111;
+    classDef external fill:#f8f9fa,stroke:#495057,color:#111;
+
     subgraph BUS["Primary Inter-Component Buses"]
         NVRAM["NVRAM Config Bus\nnvram/libnvram + /dev/nvram ioctl+mmap\nPersistent key/value state shared by most components"]
         RCNOTIFY["RC Service Bus\nnotify_rc() + init SIGUSR1 handle_notifications()\nService start/stop/restart/apply requests"]
@@ -11,8 +14,8 @@ flowchart TB
     HTTPD["httpd/www\nAdmin UI"]
     RC["rc\nOrchestrator"]
     SERVICES["Router daemons\nnetwork, wireless, usb, vpn, dpi"]
-    KERNEL["Kernel/drivers"]
-    EXTERNAL["External clients/networks/devices"]
+    KERNEL["Kernel/drivers"]:::external
+    EXTERNAL["External clients/networks/devices"]:::external
 
     HTTPD -->|"reads/writes config"| NVRAM
     HTTPD -->|"apply/restart request"| RCNOTIFY

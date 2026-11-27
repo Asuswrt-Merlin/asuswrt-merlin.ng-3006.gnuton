@@ -15,6 +15,8 @@ Analysis based on the 3006 firmware line in this repository. Key sources: `AGENT
 - [USB & System Services](diagrams/usb-system-services.mmd) — USB/storage/sharing, discovery, and system daemons.
 - [RC Service Connections](diagrams/rc-service-connections.mmd) — boot/init and RC service orchestration.
 
+**Legend:** red-bordered nodes indicate components with prebuilt/proprietary artifacts linked into the firmware (e.g., `.o` files in `prebuild/`/`prebuilt/` or prebuilt binaries/libs). Edge labels describe interaction purpose.
+
 ## RC Services
 
 A detailed RC `start_*` service catalog and orchestration overview is available in [rc-services.md](rc-services.md).
@@ -29,29 +31,33 @@ This graph shows the major firmware applications/subsystems and their purposes. 
 
 ```mermaid
 flowchart TB
-    ADMIN["Admin Browser\nWeb-based router administration UI"]
-    EXT["External Services\nFirmware feed, DDNS, NTP, VPN peers, cloud services"]
+    classDef proprietary fill:#fff5f5,stroke:#c92a2a,stroke-width:2px,color:#111;
+    classDef external fill:#f8f9fa,stroke:#495057,color:#111;
+
+    ADMIN["Admin Browser\nWeb-based router administration UI"]:::external
+    EXT["External Services\nFirmware feed, DDNS, NTP, VPN peers, cloud services"]:::external
 
     subgraph FW["AsusWrt-Merlin.ng 3006 Router Firmware"]
-        WEB["Web Management\nhttpd + ASP/CGI UI for configuration and status"]
-        CTRL["Control Plane\nrc/init orchestration, NVRAM config, shared libs, ROMFS defaults"]
-        NET["Network Services\nLAN/WAN routing, DHCP/DNS, firewall/NAT/QoS, VPN, DPI"]
-        WLAN["Wireless & AiMesh\nWiFi control, WPA/WPS, mesh/roaming, Broadcom WL stack"]
-        SYS["Platform Services\nUSB/storage/sharing, discovery/UPnP/mDNS, system daemons"]
-        KERN["Kernel & Drivers\nLinux 4.19, Broadcom platform/WL drivers, boot chain"]
+        direction TB
+        WEB["Web Management\nhttpd + ASP/CGI UI\nConfiguration and status"]
+        CTRL["Control Plane\nrc/init orchestration\nNVRAM config, shared libs, ROMFS defaults"]
+        NET["Network Services\nLAN/WAN routing, DHCP/DNS\nFirewall/NAT/QoS, VPN, DPI"]
+        WLAN["Wireless & AiMesh\nWiFi control, WPA/WPS\nMesh/roaming, Broadcom WL stack"]
+        SYS["Platform Services\nUSB/storage/sharing\nDiscovery/UPnP/mDNS, system daemons"]
+        KERN["Kernel & Drivers\nLinux 4.19\nBroadcom platform/WL drivers, boot chain"]
     end
 
-    ADMIN -->|"HTTPS/HTTP requests for status and configuration"| WEB
+    ADMIN -->|"HTTPS/HTTP admin requests/responses"| WEB
     WEB -->|"NVRAM reads/writes and rc service actions"| CTRL
-    CTRL -->|"Service start/stop/restart and config application"| NET
-    CTRL -->|"Wireless service orchestration and config application"| WLAN
-    CTRL -->|"USB/system service orchestration and config application"| SYS
-    NET -->|"Netfilter, sockets, routing, and interface control"| KERN
+    CTRL -->|"Service start/stop/restart and config apply"| NET
+    CTRL -->|"Wireless service orchestration and config apply"| WLAN
+    CTRL -->|"USB/system service orchestration and config apply"| SYS
+    NET -->|"Netfilter, sockets, routing, interface control"| KERN
     WLAN -->|"WL ioctl/IOVAR and driver events"| KERN
     SYS -->|"Block/device/filesystem and daemon runtime support"| KERN
     NET <-->|"WAN protocols, VPN tunnels, DNS/NTP/DDNS traffic"| EXT
     WEB <-->|"Firmware update checks and web API integrations"| EXT
-    SYS <-->|"USB devices, storage media, and mobile peripherals"| EXT
+    SYS <-->|"USB devices, storage media, mobile peripherals"| EXT
 ```
 
 ## 2) Control Plane
@@ -60,19 +66,23 @@ The control plane connects the web UI to persistent configuration and service or
 
 ```mermaid
 flowchart LR
-    ADMIN["Admin Browser\nOperator config/status interface"]
+    classDef proprietary fill:#fff5f5,stroke:#c92a2a,stroke-width:2px,color:#111;
+    classDef external fill:#f8f9fa,stroke:#495057,color:#111;
+
+    ADMIN["Admin Browser\nOperator config/status interface"]:::external
+    EXT["External Services\nFirmware feed, cloud/webdav endpoints"]:::external
 
     subgraph WEBPLANE["Web Management Plane"]
-        WWW["Web UI Assets (www/)\nASP pages, JS/CSS/images, model-specific UI files"]
-        HTTPD["httpd Web Server\nHTTP/CGI/EJ handling, auth, NVRAM-facing handlers"]
-        WEBAPI["Web/API Helpers\nlibwebapi, asuswebstorage, webdav_client, webs_scripts"]
+        WWW["Web UI Assets (www/)\nASP pages, JS/CSS/images\nModel-specific UI files"]
+        HTTPD["httpd Web Server\nHTTP/CGI/EJ handling\nauth, NVRAM-facing handlers"]
+        WEBAPI["Web/API Helpers\nlibwebapi, asuswebstorage\nwebdav_client, webs_scripts"]
     end
 
     subgraph CTRLPLANE["Control / Configuration Plane"]
-        RC["rc Init Orchestrator\nBoot sequencing, service start/stop, event handling"]
-        NVRAM["NVRAM Config Store\nPersistent key/value configuration and defaults overlay"]
-        SHARED["Shared Libraries/Utils\nboardapi, nvram wrappers, common helpers, IPC/event utilities"]
-        ROMFS["ROMFS Defaults/Scripts\nDefault config, certs, service scripts, prebuilt data"]
+        RC["rc Init Orchestrator\nBoot sequencing\nservice start/stop, event handling"]
+        NVRAM["NVRAM Config Store\nPersistent key/value config\ndefaults overlay"]
+        SHARED["shared Libraries/Utils\nboardapi, nvram wrappers\ncommon helpers, IPC/event utilities"]
+        ROMFS["ROMFS Defaults/Scripts\nDefault config, certs\nservice scripts, prebuilt data"]
     end
 
     ADMIN <-->|"HTTP/HTTPS admin requests and responses"| HTTPD
@@ -83,8 +93,8 @@ flowchart LR
     RC <-->|"Reads config and persists runtime state"| NVRAM
     RC <-->|"Uses shared helpers and board/platform APIs"| SHARED
     RC -->|"Loads defaults, certs, and helper scripts"| ROMFS
-    WEBAPI <-->|"Reads credentials/settings for cloud/update/webdav features"| NVRAM
-    WEBAPI <-->|"Calls external web services and firmware feed"| EXT["External Services\nFirmware feed, cloud/webdav endpoints"]
+    WEBAPI <-->|"Reads credentials/settings for cloud/update/webdav"| NVRAM
+    WEBAPI <-->|"Calls external web services and firmware feed"| EXT
 ```
 
 ## 3) Network Services
@@ -92,46 +102,49 @@ flowchart LR
 Network and security applications are orchestrated by `rc`, configured through NVRAM, and enforce policy through kernel/netfilter interfaces.
 
 ```mermaid
-flowchart LR
-    RC["rc Init Orchestrator\nStarts/stops network and security services"]
-    NVRAM["NVRAM Config Store\nService enablement, WAN/LAN/firewall/VPN settings"]
-    KERN["Linux Kernel / Netfilter\nInterfaces, routing, conntrack, iptables hooks"]
-    EXT["External Network Peers\nISP/WAN, VPN peers, DDNS/NTP/DNS services"]
+flowchart TB
+    classDef proprietary fill:#fff5f5,stroke:#c92a2a,stroke-width:2px,color:#111;
+    classDef external fill:#f8f9fa,stroke:#495057,color:#111;
 
-    subgraph NET["Networking & Security Services"]
-        NETCORE["Network Core\nbridge/bridge-utils, vlan, iproute2, ethtool, conntrack tools"]
-        DHCPDNS["DHCP/DNS Services\ndnsmasq, udhcpd/dhcpfwd, dns_ping, stubby"]
-        WAN["WAN/PPP/Tunnel Services\npppd, rp-pppoe, pptp-client, xl2tpd/l2tp, 6relayd, odhcp6c"]
-        FWALL["Firewall/NAT/QoS\niptables/ipset/ebtables rules, tc/qos, traffic monitor/rstats"]
-        VPN["VPN/Security Services\nOpenVPN, StrongSwan/IPsec, WireGuard, OpenSSL, easy-rsa, acme.sh"]
-        DPI["DPI/Parental/Protection\nbwdpi_source, urlfilterd, protect_srv, AiProtection hooks"]
+    RC["rc Service Orchestrator\nStarts/stops network daemons and applies config"]
+    NVRAM["NVRAM Config Store\nLAN/WAN/DHCP/DNS/firewall/VPN/DPI settings"]
+
+    subgraph CORE["Network Core"]
+        NETCORE["Network Core Utilities\nbridge/bridge-utils, vlan, iproute2, ethtool, conntrack\nInterface, route, bridge, and neighbor management"]
     end
 
-    RC -->|"Applies config and starts/stops daemons"| NETCORE
-    RC -->|"Applies config and starts/stops daemons"| DHCPDNS
-    RC -->|"Applies config and starts/stops daemons"| WAN
-    RC -->|"Regenerates rules and starts monitors"| FWALL
-    RC -->|"Starts VPN daemons and cert/keys workflows"| VPN
-    RC -->|"Starts DPI/filter engines and policy hooks"| DPI
+    subgraph EDGE["Edge Network Services"]
+        DHCPDNS["DHCP/DNS Service\ndnsmasq, udhcpd/dhcpfwd, dns_ping\nAddress assignment and name resolution"]
+        WAN["WAN/PPP/Tunnel Services\npppd, rp-pppoe, pptp-client, xl2tpd/l2tp, 6relayd, odhcp6c\nWAN link establishment and IPv6 transition"]
+        FWALL["Firewall/NAT/QoS\niptables/ipset/ebtables, rc firewall logic, tc/qos, rstats\nTraffic filtering, NAT, shaping, accounting"]
+    end
 
-    NETCORE <-->|"Reads interface/bridge/VLAN settings"| NVRAM
-    DHCPDNS <-->|"Reads lease/DNS/DHCP settings"| NVRAM
-    WAN <-->|"Reads WAN protocol/credentials/settings"| NVRAM
-    FWALL <-->|"Reads firewall/NAT/QoS/port-forward settings"| NVRAM
-    VPN <-->|"Reads VPN keys/policies/server-client settings"| NVRAM
-    DPI <-->|"Reads parental control/AiProtection settings"| NVRAM
+    subgraph SEC["Security Services"]
+        VPN["VPN/Security Services\nOpenVPN, StrongSwan/IPsec, WireGuard, OpenSSL, easy-rsa, acme.sh\nEncrypted tunnels and certificate management"]
+        DPI["DPI/Parental Protection\nbwdpi_source, urlfilterd, protect_srv\nTraffic inspection and policy enforcement"]:::proprietary
+    end
 
-    NETCORE -->|"Configures links, bridges, VLANs, routes via ip/sysfs"| KERN
-    DHCPDNS -->|"Binds UDP/TCP DNS/DHCP sockets"| KERN
-    WAN -->|"Creates PPP/tunnel interfaces and routes"| KERN
-    FWALL -->|"Installs iptables/ipset/ebtables/tc rules"| KERN
-    VPN -->|"Creates tunnel interfaces and crypto sockets"| KERN
-    DPI -->|"Hooks packet inspection and policy enforcement"| KERN
+    KERNEL["Linux Kernel Networking\nnetfilter, routing, interfaces, xfrm/WireGuard"]:::external
+    EXT["External Networks/Peers\nISP, DNS servers, VPN peers, web services"]:::external
 
-    WAN <-->|"PPP/DHCP/IPv6 WAN connectivity"| EXT
-    DHCPDNS <-->|"Upstream DNS/DoT queries and NTP-assisted resolution dependencies"| EXT
-    VPN <-->|"Encrypted tunnels to VPN peers"| EXT
-    FWALL <-->|"NAT/port forwarding of inbound/outbound traffic"| EXT
+    RC -->|"starts/restarts daemons and reloads rules"| NETCORE
+    RC -->|"generates config and manages DHCP/DNS lifecycle"| DHCPDNS
+    RC -->|"controls WAN session setup/teardown"| WAN
+    RC -->|"applies firewall/NAT/QoS rules"| FWALL
+    RC -->|"manages VPN daemons and cert renewal"| VPN
+    RC -->|"starts/stops DPI and filtering services"| DPI
+
+    RC <-->|"reads/writes network service configuration"| NVRAM
+    NETCORE -->|"configures links/routes/bridges via netlink/ioctl"| KERNEL
+    DHCPDNS -->|"binds UDP/TCP sockets for DHCP/DNS service"| KERNEL
+    WAN -->|"creates PPP/tunnel interfaces and routes"| KERNEL
+    FWALL -->|"installs netfilter/qdisc rules"| KERNEL
+    VPN -->|"creates tunnel interfaces/xfrm state"| KERNEL
+    DPI -->|"inspects packets via netfilter/conntrack hooks"| KERNEL
+
+    DHCPDNS <-->|"DNS queries, DHCP leases, RA/DHCPv6"| EXT
+    WAN <-->|"PPP/ISP/tunnel control and data traffic"| EXT
+    VPN <-->|"Encrypted tunnel traffic to peers"| EXT
 ```
 
 ## 4) Wireless & AiMesh
@@ -140,28 +153,35 @@ Wireless services are split between user-space control/mesh daemons and the Broa
 
 ```mermaid
 flowchart LR
-    RC["rc Init Orchestrator\nStarts wireless, WPA/WPS, and AiMesh services"]
-    NVRAM["NVRAM Config Store\nSSID, security, radio, band-steering, AiMesh settings"]
-    KERN["Linux Kernel\nNetlink, sockets, interface state"]
-    BRCMDRV["Broadcom Platform Drivers\nbcmdrivers, shared, RDP, ethernet/switch/accelerator"]
-    WLDRV["Broadcom WL Driver Stack\nbcmdrivers/.../net/wl, shared WL interfaces, dhd"]
+    classDef proprietary fill:#fff5f5,stroke:#c92a2a,stroke-width:2px,color:#111;
+    classDef external fill:#f8f9fa,stroke:#495057,color:#111;
 
-    subgraph WLAN["Wireless & AiMesh Services"]
-        WLCTRL["WiFi Control\nwlceventd, wlc_nt, wps/wsc, 802.1x/eapd, bsd"]
-        AMAS["AiMesh/Roaming\namas-utils, mapd, asd/asd2.1, steering/mesh policy"]
+    RC["rc Service Orchestrator\nStarts/stops wireless and mesh services"]
+    NVRAM["NVRAM Config Store\nSSID/security/channel/band/AiMesh settings"]
+
+    subgraph WIFI["WiFi Control"]
+        WLCTRL["WiFi Control Daemons\nwlceventd, wlc_nt, wps/wsc, 802.1x/eapd, bsd\nStation/AP event handling, WPS, auth, band steering"]:::proprietary
     end
 
-    RC -->|"Starts/restarts wireless and mesh daemons"| WLCTRL
-    RC -->|"Starts/restarts AiMesh and roaming daemons"| AMAS
-    WLCTRL <-->|"Reads radio/security/WPS configuration"| NVRAM
-    AMAS <-->|"Reads mesh topology, steering, and node settings"| NVRAM
+    subgraph MESH["AiMesh / Roaming"]
+        AMAS["AiMesh/Roaming Services\namas-utils, mapd, asd/asd2.1\nMesh onboarding, steering, roaming policy"]:::proprietary
+    end
 
-    WLCTRL -->|"Configures AP/STA/VIF via wl ioctl/IOVAR"| WLDRV
-    AMAS -->|"Controls roaming/steering/mesh via WL and service interfaces"| WLDRV
-    WLCTRL <-->|"Receives wireless events and interface state notifications"| KERN
-    AMAS <-->|"Uses network sockets for mesh/backhaul coordination"| KERN
-    WLDRV -->|"Uses Broadcom driver/platform APIs"| BRCMDRV
-    BRCMDRV -->|"Registers devices and handles hardware interrupts/data paths"| KERN
+    WLDRV["Broadcom WL Driver/SDK\nbcmdrivers/.../net/wl, shared wl interfaces, dhd\nWireless MAC/PHY/driver stack"]:::proprietary
+    KERNEL["Linux Kernel / Platform Drivers\nnetdev, cfg80211/ioctl bridge, interrupts"]:::external
+    CLIENTS["WiFi Clients / Mesh Nodes\nSTAs, repeaters, AiMesh nodes"]:::external
+
+    RC -->|"starts/stops and configures WiFi daemons"| WLCTRL
+    RC -->|"starts/stops and configures AiMesh services"| AMAS
+    RC <-->|"reads/writes wireless configuration"| NVRAM
+    WLCTRL <-->|"reads/writes WiFi/WPS/security state"| NVRAM
+    AMAS <-->|"reads/writes mesh/roaming state"| NVRAM
+
+    WLCTRL -->|"WL ioctl/IOVAR, event sockets, driver control"| WLDRV
+    AMAS -->|"topology/steering control via wl/service APIs"| WLDRV
+    WLDRV -->|"driver registration, netdev ops, interrupts, DMA"| KERNEL
+    WLCTRL <-->|"802.11 management, WPA/WPS signaling"| CLIENTS
+    AMAS <-->|"AiMesh discovery, onboarding, roaming coordination"| CLIENTS
 ```
 
 ## 5) USB & System Services
@@ -169,33 +189,44 @@ flowchart LR
 Platform services cover USB/storage sharing, LAN discovery, and general system daemons.
 
 ```mermaid
-flowchart LR
-    RC["rc Init Orchestrator\nStarts USB, storage, discovery, and system daemons"]
-    NVRAM["NVRAM Config Store\nUSB/NAS/service enablement and policy settings"]
-    KERN["Linux Kernel / Sysfs / Udev\nBlock devices, USB stack, filesystems, process/runtime"]
-    EXT["External Devices/Clients\nUSB disks/modems/printers, LAN clients, mobile devices"]
+flowchart TB
+    classDef proprietary fill:#fff5f5,stroke:#c92a2a,stroke-width:2px,color:#111;
+    classDef external fill:#f8f9fa,stroke:#495057,color:#111;
 
-    subgraph SYS["Platform & Peripheral Services"]
-        USB["USB/Storage/Sharing\nusbclient/modeswitch, udev, ntfs/tuxera/e2fs/dosfstools, samba/vsftpd/lighttpd/minidlna/nfs"]
-        DISC["Discovery/UPnP/mDNS\navahi, mDNSResponder, miniupnpd, lldpd, networkmap"]
-        MISC["System Utilities/Daemons\nbusybox, syslog, ntpclient, cron/sched, sysstate, aura LED, nt_center, infosvr"]
+    RC["rc Service Orchestrator\nStarts/stops USB, storage, discovery, and system daemons"]
+    NVRAM["NVRAM Config Store\nUSB, sharing, service, LED, and feature settings"]
+    KERNEL["Linux Kernel / Device Drivers\nUSB, block, filesystem, netdev, sysfs/procfs"]:::external
+    DEVICES["USB/Storage/Mobile Devices\nDisks, printers, modems, peripherals"]:::external
+    CLIENTS["LAN/Internet Clients\nSMB/NFS/DLNA/UPnP/mDNS clients"]:::external
+
+    subgraph USB["USB / Storage / Sharing"]
+        USBST["USB/Storage/Sharing Services\nusbclient, usb-modeswitch, udev, ntfs-3g/tuxera/e2fs/dosfstools\nsamba, vsftpd, lighttpd, minidlna, nfs\nDevice mounting and file/media sharing"]:::proprietary
     end
 
-    RC -->|"Starts/stops storage and sharing services"| USB
-    RC -->|"Starts/stops discovery and network advertisement services"| DISC
-    RC -->|"Starts/stops system utilities and monitors"| MISC
+    subgraph DISC["Discovery / UPnP / mDNS"]
+        DISCOV["Discovery Services\navahi, mDNSResponder, miniupnpd, lldpd, networkmap\nService advertisement, discovery, topology, port mapping"]
+    end
 
-    USB <-->|"Reads share, mount, modem, and app settings"| NVRAM
-    DISC <-->|"Reads UPnP/mDNS/discovery settings"| NVRAM
-    MISC <-->|"Reads system, logging, LED, and schedule settings"| NVRAM
+    subgraph SYS["System Utilities / Daemons"]
+        MISC["System Utilities/Daemons\nbusybox, syslog, ntpclient, cron/sched, sysstate\naura LED, nt_center, infosvr\nGeneral system operation and maintenance"]
+    end
 
-    USB -->|"Mounts filesystems, manages devices, serves file/media protocols"| KERN
-    DISC -->|"Opens multicast/unicast sockets and advertises services"| KERN
-    MISC -->|"Runs scheduled jobs, logging, timers, and device control"| KERN
+    RC -->|"detects devices, mounts volumes, starts sharing services"| USBST
+    RC -->|"starts discovery/advertisement/port-mapping services"| DISCOV
+    RC -->|"starts system and maintenance daemons"| MISC
+    RC <-->|"reads/writes service configuration"| NVRAM
 
-    USB <-->|"USB mass storage, printers, modems, file/media access"| EXT
-    DISC <-->|"UPnP/mDNS/LLDP/service discovery with LAN clients"| EXT
-    MISC <-->|"NTP/syslog/infosvr interactions as configured"| EXT
+    USBST <-->|"reads/writes USB/share/media settings"| NVRAM
+    DISCOV <-->|"reads/writes discovery/UPnP/topology settings"| NVRAM
+    MISC <-->|"reads/writes system/feature settings"| NVRAM
+
+    USBST -->|"udev events, block/fs mounts, device I/O"| KERNEL
+    DISCOV -->|"network sockets, multicast, netlink/interface state"| KERNEL
+    MISC -->|"sysfs/procfs, timers, device control"| KERNEL
+
+    USBST <-->|"USB attach/remove, storage and peripheral access"| DEVICES
+    USBST <-->|"SMB/FTP/HTTP/DLNA/NFS file sharing"| CLIENTS
+    DISCOV <-->|"mDNS/SSDP/LLDP/UPnP discovery and mapping"| CLIENTS
 ```
 
 ## 6) RC Service Orchestration
@@ -204,61 +235,52 @@ The RC layer is the runtime control hub. The detailed `start_*` catalog is in [r
 
 ```mermaid
 flowchart TB
-    BOOT["Boot / Init\ninit.c and rc.c early system initialization"]
-    SS["Service Orchestrator\nstart_services()/stop_services() in services.c"]
-    LAN["LAN Orchestrator\nstart_lan() in lan.c"]
-    WAN["WAN Orchestrator\nstart_wan()/start_wan_if() in wan.c"]
-    USB["USB Orchestrator\nstart_usb() in usb.c"]
-    WL["Wireless Init\nstart_wl()/start_wireless() in lan.c/rc"]
-    FW["Firewall Orchestrator\nstart_firewall() in firewall.c"]
-    JFFS["Persistent Storage Init\nstart_jffs2()/start_ubifs() in jffs2.c/ubifs.c"]
+    classDef proprietary fill:#fff5f5,stroke:#c92a2a,stroke-width:2px,color:#111;
 
-    CORE["Core System Services\nsyslogd/klogd, hotplug2, cron, ntp, watchdogs, LEDs"]
-    NETSVC["Network Services\ndnsmasq, stubby, httpd, UPnP, networkmap, wanduck, SSH/telnet, LLDP/Avahi"]
-    WLSVC["Wireless Services\neapd/nas/wpa, wlceventd, bsd, asd/amas, roamast, WPS, DCS/ACSD"]
-    SECSVC["Security/VPN/DPI Services\nOpenVPN/VPNC/WireGuard hooks, BWDPI checks, letsencrypt, conn_diag"]
-    USBSVC["USB/App Services\nnas_services, Samba, FTP, minidlna/DMS, WebDAV, Timemachine, diskmon"]
-    FEAT["Feature Daemons\naura RGB, AiCloud/awsiot, aae/mastiff/natnl, infosvr, notification_center"]
+    INIT["init/rc boot\nSystem initialization and main control loop"]
+    SS["start_services()\nCore service orchestrator in services.c"]
+    LAN["start_lan()\nLAN/bridge/VLAN/WiFi bringup in lan.c"]
+    WAN["start_wan() / start_wan_if()\nWAN interface and protocol bringup in wan.c"]
+    USB["start_usb()\nUSB device/storage initialization in usb.c"]
+    WL["start_wl() / start_wireless()\nWireless radio/interface initialization"]
+    FW["start_firewall()\nNetfilter/firewall/NAT rule application in firewall.c"]
+    JFFS["start_jffs2()/start_ubifs()\nPersistent writable filesystem mount"]
 
-    BR["LAN Bridge/VLAN Setup\nstart_vlan, start_lan_port, start_lan_wl, DHCP/DNS reload"]
-    WANIF["WAN Interface Bringup\nDHCP/PPPoE/USB modem, start_wan6, 6relayd/dhcp6c/rdisc6"]
-    WANFEAT["WAN Feature Hooks\nVPN client/server hooks, QoS, firewall, DDNS, UPnP, routes"]
-    NAS["NAS/App Stack\nstart_nas_services, Samba/FTP/DMS/WebDAV/Timemachine"]
+    SS -->|"starts/stops core daemons"| CORE["Core/System Services\nsyslogd/klogd/logger, hotplug2, cron, ntp, watchdogs, LEDs"]
+    SS -->|"starts/stops network daemons"| NETSVC["Network Services\ndnsmasq, stubby, httpd, upnp, networkmap, wanduck, sshd, snmpd"]
+    SS -->|"starts/stops wireless daemons"| WLSVC["Wireless Services\neapd, nas/wpa, wlceventd, bsd, asd, AMAS, wps"]
+    SS -->|"starts/stops security daemons"| SECSVC["Security/VPN/DPI\nOpenVPN/WireGuard hooks, BWDPI checks, letsencrypt, conn_diag"]
+    SS -->|"starts/stops USB/app daemons"| USBSVC["USB/App Services\nnas_services, samba, ftpd, minidlna/DMS, webdav, timemachine"]
+    SS -->|"starts/stops feature daemons"| FEAT["Feature Daemons\naura RGB, AiCloud/awsiot, infosvr, nt_center, sysstate"]
 
-    NVRAM["NVRAM Config Store\nnvram/* and shared/* configuration/state"]
-    HTTPD["Web Control Backend\nhttpd CGI/ASP in httpd/* and www/*"]
-    RCMD["RC Command Interface\nrc_service/notify_rc service action dispatcher"]
+    WLSVC -.->|"includes prebuilt/proprietary components"| PROP["Prebuilt/proprietary examples\nasd, wlceventd, bsd, amas-utils libs"]:::proprietary
 
-    BOOT -->|"Invokes core service startup"| SS
-    BOOT -->|"Initializes LAN interfaces and bridge"| LAN
-    BOOT -->|"Initializes WAN interfaces and protocols"| WAN
-    BOOT -->|"Initializes USB/storage subsystem"| USB
-    BOOT -->|"Initializes wireless interfaces"| WL
-    BOOT -->|"Applies initial firewall policy"| FW
-    BOOT -->|"Mounts persistent user partition"| JFFS
+    LAN -->|"configures LAN interfaces/bridge/VLAN"| BR["Bridge/VLAN/LAN IF\nstart_vlan, start_lan_port, start_lan_wl, DHCP/DNS reload"]
+    WAN -->|"brings up WAN protocol/interface"| WANIF["WAN Interface Bringup\nDHCP/PPPoE/USB modem, start_wan6, 6relayd/dhcp6c/rdisc6"]
+    WAN -->|"applies WAN-dependent features"| WANFEAT["WAN Features\nVPN client/server hooks, QoS, firewall, DDNS, UPnP, routes"]
+    USB -->|"starts NAS/app stack"| NAS["NAS/App Stack\nstart_nas_services, samba, ftpd, DMS, webdav, timemachine"]
 
-    SS -->|"Starts/stops core daemons"| CORE
-    SS -->|"Starts/stops network-facing daemons"| NETSVC
-    SS -->|"Starts/stops wireless control daemons"| WLSVC
-    SS -->|"Starts/stops security and VPN-related daemons"| SECSVC
-    SS -->|"Starts/stops USB/NAS application daemons"| USBSVC
-    SS -->|"Starts/stops product feature daemons"| FEAT
+    NVRAM["NVRAM Config Bus\nnvram/* shared/* persistent key-value config"]
+    HTTPD["httpd Web Backend\nCGI/ASP handlers in httpd/* serving www/*"]
+    RCMD["RC Dispatcher\nrc rc_service / notify_rc event handling"]
 
-    LAN -->|"Configures bridge/VLAN/ports and reloads LAN services"| BR
-    WAN -->|"Brings up WAN link/protocol and IPv6"| WANIF
-    WAN -->|"Applies WAN-dependent features and policies"| WANFEAT
-    USB -->|"Starts NAS/media/sharing application stack"| NAS
+    INIT -->|"invokes during boot"| SS
+    INIT -->|"invokes during boot"| LAN
+    INIT -->|"invokes during boot"| WAN
+    INIT -->|"invokes during boot"| USB
+    INIT -->|"invokes during boot"| WL
+    INIT -->|"invokes during boot"| FW
+    INIT -->|"invokes during boot"| JFFS
 
-    NVRAM <-->|"Reads service configuration and writes runtime state"| SS
-    NVRAM <-->|"Reads LAN/bridge/VLAN/wireless settings"| LAN
-    NVRAM <-->|"Reads WAN/protocol/firewall/feature settings"| WAN
-    NVRAM <-->|"Reads web settings and persists UI changes"| HTTPD
-    HTTPD -->|"Requests service restart/apply after config changes"| SS
-    HTTPD -->|"Issues rc service actions for targeted changes"| RCMD
-    RCMD -->|"Dispatches service start/stop/restart commands"| SS
-    RCMD -->|"Dispatches LAN reconfiguration actions"| LAN
-    RCMD -->|"Dispatches WAN reconfiguration actions"| WAN
-    RCMD -->|"Dispatches firewall rebuild actions"| FW
+    NVRAM <-->|"reads/writes service configuration"| SS
+    NVRAM <-->|"reads/writes LAN configuration"| LAN
+    NVRAM <-->|"reads/writes WAN configuration"| WAN
+    NVRAM <-->|"reads/writes UI/config state"| HTTPD
+    HTTPD -->|"applies settings via rc service actions"| RCMD
+    RCMD -->|"dispatches service start/stop/restart"| SS
+    RCMD -->|"dispatches LAN reconfiguration"| LAN
+    RCMD -->|"dispatches WAN reconfiguration"| WAN
+    RCMD -->|"dispatches firewall reload"| FW
 ```
 
 ## 7) Source Component Map

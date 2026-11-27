@@ -13,6 +13,12 @@ This document catalogs components under `release/src/router` (347 top-level entr
 - [VPN, Security, and DPI](diagrams/router/vpn-security-dpi.mmd)
 - [IPC / NVRAM Bus Map](diagrams/router/ipc-nvram-bus.mmd)
 
+## Legend
+
+- **Red-bordered box (`proprietary`)**: component directory contains prebuilt/proprietary artifacts linked into the firmware (e.g., `.o` files in `prebuild/`/`prebuilt/`, prebuilt binaries/libs). Treat as source-limited unless corresponding source is present.
+- **Normal box**: source available in tree or normal open-source package integration (still may depend on external toolchain/libs).
+- **Edge labels**: primary interaction purpose (config read/write, service control, IPC/socket, netlink/ioctl, file/config generation, network protocol).
+
 ## Cross-Cutting IPC / Bus Mechanisms
 
 | Mechanism | Purpose | Key evidence/components |

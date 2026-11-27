@@ -1,56 +1,47 @@
 flowchart TB
-    BOOT["Boot / Init\ninit.c and rc.c early system initialization"]
-    SS["Service Orchestrator\nstart_services()/stop_services() in services.c"]
-    LAN["LAN Orchestrator\nstart_lan() in lan.c"]
-    WAN["WAN Orchestrator\nstart_wan()/start_wan_if() in wan.c"]
-    USB["USB Orchestrator\nstart_usb() in usb.c"]
-    WL["Wireless Init\nstart_wl()/start_wireless() in lan.c/rc"]
-    FW["Firewall Orchestrator\nstart_firewall() in firewall.c"]
-    JFFS["Persistent Storage Init\nstart_jffs2()/start_ubifs() in jffs2.c/ubifs.c"]
+    classDef proprietary fill:#fff5f5,stroke:#c92a2a,stroke-width:2px,color:#111;
 
-    CORE["Core System Services\nsyslogd/klogd, hotplug2, cron, ntp, watchdogs, LEDs"]
-    NETSVC["Network Services\ndnsmasq, stubby, httpd, UPnP, networkmap, wanduck, SSH/telnet, LLDP/Avahi"]
-    WLSVC["Wireless Services\neapd/nas/wpa, wlceventd, bsd, asd/amas, roamast, WPS, DCS/ACSD"]
-    SECSVC["Security/VPN/DPI Services\nOpenVPN/VPNC/WireGuard hooks, BWDPI checks, letsencrypt, conn_diag"]
-    USBSVC["USB/App Services\nnas_services, Samba, FTP, minidlna/DMS, WebDAV, Timemachine, diskmon"]
-    FEAT["Feature Daemons\naura RGB, AiCloud/awsiot, aae/mastiff/natnl, infosvr, notification_center"]
+    INIT["init/rc boot\nSystem initialization and main control loop"]
+    SS["start_services()\nCore service orchestrator in services.c"]
+    LAN["start_lan()\nLAN/bridge/VLAN/WiFi bringup in lan.c"]
+    WAN["start_wan() / start_wan_if()\nWAN interface and protocol bringup in wan.c"]
+    USB["start_usb()\nUSB device/storage initialization in usb.c"]
+    WL["start_wl() / start_wireless()\nWireless radio/interface initialization"]
+    FW["start_firewall()\nNetfilter/firewall/NAT rule application in firewall.c"]
+    JFFS["start_jffs2()/start_ubifs()\nPersistent writable filesystem mount"]
 
-    BR["LAN Bridge/VLAN Setup\nstart_vlan, start_lan_port, start_lan_wl, DHCP/DNS reload"]
-    WANIF["WAN Interface Bringup\nDHCP/PPPoE/USB modem, start_wan6, 6relayd/dhcp6c/rdisc6"]
-    WANFEAT["WAN Feature Hooks\nVPN client/server hooks, QoS, firewall, DDNS, UPnP, routes"]
-    NAS["NAS/App Stack\nstart_nas_services, Samba/FTP/DMS/WebDAV/Timemachine"]
+    SS -->|"starts/stops core daemons"| CORE["Core/System Services\nsyslogd/klogd/logger, hotplug2, cron, ntp, watchdogs, LEDs"]
+    SS -->|"starts/stops network daemons"| NETSVC["Network Services\ndnsmasq, stubby, httpd, upnp, networkmap, wanduck, sshd, snmpd"]
+    SS -->|"starts/stops wireless daemons"| WLSVC["Wireless Services\neapd, nas/wpa, wlceventd, bsd, asd, AMAS, wps"]
+    SS -->|"starts/stops security daemons"| SECSVC["Security/VPN/DPI\nOpenVPN/WireGuard hooks, BWDPI checks, letsencrypt, conn_diag"]
+    SS -->|"starts/stops USB/app daemons"| USBSVC["USB/App Services\nnas_services, samba, ftpd, minidlna/DMS, webdav, timemachine"]
+    SS -->|"starts/stops feature daemons"| FEAT["Feature Daemons\naura RGB, AiCloud/awsiot, infosvr, nt_center, sysstate"]
 
-    NVRAM["NVRAM Config Store\nnvram/* and shared/* configuration/state"]
-    HTTPD["Web Control Backend\nhttpd CGI/ASP in httpd/* and www/*"]
-    RCMD["RC Command Interface\nrc_service/notify_rc service action dispatcher"]
+    WLSVC -.->|"includes prebuilt/proprietary components"| PROP["Prebuilt/proprietary examples\nasd, wlceventd, bsd, amas-utils libs"]:::proprietary
 
-    BOOT -->|"Invokes core service startup"| SS
-    BOOT -->|"Initializes LAN interfaces and bridge"| LAN
-    BOOT -->|"Initializes WAN interfaces and protocols"| WAN
-    BOOT -->|"Initializes USB/storage subsystem"| USB
-    BOOT -->|"Initializes wireless interfaces"| WL
-    BOOT -->|"Applies initial firewall policy"| FW
-    BOOT -->|"Mounts persistent user partition"| JFFS
+    LAN -->|"configures LAN interfaces/bridge/VLAN"| BR["Bridge/VLAN/LAN IF\nstart_vlan, start_lan_port, start_lan_wl, DHCP/DNS reload"]
+    WAN -->|"brings up WAN protocol/interface"| WANIF["WAN Interface Bringup\nDHCP/PPPoE/USB modem, start_wan6, 6relayd/dhcp6c/rdisc6"]
+    WAN -->|"applies WAN-dependent features"| WANFEAT["WAN Features\nVPN client/server hooks, QoS, firewall, DDNS, UPnP, routes"]
+    USB -->|"starts NAS/app stack"| NAS["NAS/App Stack\nstart_nas_services, samba, ftpd, DMS, webdav, timemachine"]
 
-    SS -->|"Starts/stops core daemons"| CORE
-    SS -->|"Starts/stops network-facing daemons"| NETSVC
-    SS -->|"Starts/stops wireless control daemons"| WLSVC
-    SS -->|"Starts/stops security and VPN-related daemons"| SECSVC
-    SS -->|"Starts/stops USB/NAS application daemons"| USBSVC
-    SS -->|"Starts/stops product feature daemons"| FEAT
+    NVRAM["NVRAM Config Bus\nnvram/* shared/* persistent key-value config"]
+    HTTPD["httpd Web Backend\nCGI/ASP handlers in httpd/* serving www/*"]
+    RCMD["RC Dispatcher\nrc rc_service / notify_rc event handling"]
 
-    LAN -->|"Configures bridge/VLAN/ports and reloads LAN services"| BR
-    WAN -->|"Brings up WAN link/protocol and IPv6"| WANIF
-    WAN -->|"Applies WAN-dependent features and policies"| WANFEAT
-    USB -->|"Starts NAS/media/sharing application stack"| NAS
+    INIT -->|"invokes during boot"| SS
+    INIT -->|"invokes during boot"| LAN
+    INIT -->|"invokes during boot"| WAN
+    INIT -->|"invokes during boot"| USB
+    INIT -->|"invokes during boot"| WL
+    INIT -->|"invokes during boot"| FW
+    INIT -->|"invokes during boot"| JFFS
 
-    NVRAM <-->|"Reads service configuration and writes runtime state"| SS
-    NVRAM <-->|"Reads LAN/bridge/VLAN/wireless settings"| LAN
-    NVRAM <-->|"Reads WAN/protocol/firewall/feature settings"| WAN
-    NVRAM <-->|"Reads web settings and persists UI changes"| HTTPD
-    HTTPD -->|"Requests service restart/apply after config changes"| SS
-    HTTPD -->|"Issues rc service actions for targeted changes"| RCMD
-    RCMD -->|"Dispatches service start/stop/restart commands"| SS
-    RCMD -->|"Dispatches LAN reconfiguration actions"| LAN
-    RCMD -->|"Dispatches WAN reconfiguration actions"| WAN
-    RCMD -->|"Dispatches firewall rebuild actions"| FW
+    NVRAM <-->|"reads/writes service configuration"| SS
+    NVRAM <-->|"reads/writes LAN configuration"| LAN
+    NVRAM <-->|"reads/writes WAN configuration"| WAN
+    NVRAM <-->|"reads/writes UI/config state"| HTTPD
+    HTTPD -->|"applies settings via rc service actions"| RCMD
+    RCMD -->|"dispatches service start/stop/restart"| SS
+    RCMD -->|"dispatches LAN reconfiguration"| LAN
+    RCMD -->|"dispatches WAN reconfiguration"| WAN
+    RCMD -->|"dispatches firewall reload"| FW

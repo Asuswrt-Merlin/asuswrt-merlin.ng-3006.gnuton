@@ -1,40 +1,43 @@
-flowchart LR
-    RC["rc Init Orchestrator\nStarts/stops network and security services"]
-    NVRAM["NVRAM Config Store\nService enablement, WAN/LAN/firewall/VPN settings"]
-    KERN["Linux Kernel / Netfilter\nInterfaces, routing, conntrack, iptables hooks"]
-    EXT["External Network Peers\nISP/WAN, VPN peers, DDNS/NTP/DNS services"]
+flowchart TB
+    classDef proprietary fill:#fff5f5,stroke:#c92a2a,stroke-width:2px,color:#111;
+    classDef external fill:#f8f9fa,stroke:#495057,color:#111;
 
-    subgraph NET["Networking & Security Services"]
-        NETCORE["Network Core\nbridge/bridge-utils, vlan, iproute2, ethtool, conntrack tools"]
-        DHCPDNS["DHCP/DNS Services\ndnsmasq, udhcpd/dhcpfwd, dns_ping, stubby"]
-        WAN["WAN/PPP/Tunnel Services\npppd, rp-pppoe, pptp-client, xl2tpd/l2tp, 6relayd, odhcp6c"]
-        FWALL["Firewall/NAT/QoS\niptables/ipset/ebtables rules, tc/qos, traffic monitor/rstats"]
-        VPN["VPN/Security Services\nOpenVPN, StrongSwan/IPsec, WireGuard, OpenSSL, easy-rsa, acme.sh"]
-        DPI["DPI/Parental/Protection\nbwdpi_source, urlfilterd, protect_srv, AiProtection hooks"]
+    RC["rc Service Orchestrator\nStarts/stops network daemons and applies config"]
+    NVRAM["NVRAM Config Store\nLAN/WAN/DHCP/DNS/firewall/VPN/DPI settings"]
+
+    subgraph CORE["Network Core"]
+        NETCORE["Network Core Utilities\nbridge/bridge-utils, vlan, iproute2, ethtool, conntrack\nInterface, route, bridge, and neighbor management"]
     end
 
-    RC -->|"Applies config and starts/stops daemons"| NETCORE
-    RC -->|"Applies config and starts/stops daemons"| DHCPDNS
-    RC -->|"Applies config and starts/stops daemons"| WAN
-    RC -->|"Regenerates rules and starts monitors"| FWALL
-    RC -->|"Starts VPN daemons and cert/keys workflows"| VPN
-    RC -->|"Starts DPI/filter engines and policy hooks"| DPI
+    subgraph EDGE["Edge Network Services"]
+        DHCPDNS["DHCP/DNS Service\ndnsmasq, udhcpd/dhcpfwd, dns_ping\nAddress assignment and name resolution"]
+        WAN["WAN/PPP/Tunnel Services\npppd, rp-pppoe, pptp-client, xl2tpd/l2tp, 6relayd, odhcp6c\nWAN link establishment and IPv6 transition"]
+        FWALL["Firewall/NAT/QoS\niptables/ipset/ebtables, rc firewall logic, tc/qos, rstats\nTraffic filtering, NAT, shaping, accounting"]
+    end
 
-    NETCORE <-->|"Reads interface/bridge/VLAN settings"| NVRAM
-    DHCPDNS <-->|"Reads lease/DNS/DHCP settings"| NVRAM
-    WAN <-->|"Reads WAN protocol/credentials/settings"| NVRAM
-    FWALL <-->|"Reads firewall/NAT/QoS/port-forward settings"| NVRAM
-    VPN <-->|"Reads VPN keys/policies/server-client settings"| NVRAM
-    DPI <-->|"Reads parental control/AiProtection settings"| NVRAM
+    subgraph SEC["Security Services"]
+        VPN["VPN/Security Services\nOpenVPN, StrongSwan/IPsec, WireGuard, OpenSSL, easy-rsa, acme.sh\nEncrypted tunnels and certificate management"]
+        DPI["DPI/Parental Protection\nbwdpi_source, urlfilterd, protect_srv\nTraffic inspection and policy enforcement"]:::proprietary
+    end
 
-    NETCORE -->|"Configures links, bridges, VLANs, routes via ip/sysfs"| KERN
-    DHCPDNS -->|"Binds UDP/TCP DNS/DHCP sockets"| KERN
-    WAN -->|"Creates PPP/tunnel interfaces and routes"| KERN
-    FWALL -->|"Installs iptables/ipset/ebtables/tc rules"| KERN
-    VPN -->|"Creates tunnel interfaces and crypto sockets"| KERN
-    DPI -->|"Hooks packet inspection and policy enforcement"| KERN
+    KERNEL["Linux Kernel Networking\nnetfilter, routing, interfaces, xfrm/WireGuard"]:::external
+    EXT["External Networks/Peers\nISP, DNS servers, VPN peers, web services"]:::external
 
-    WAN <-->|"PPP/DHCP/IPv6 WAN connectivity"| EXT
-    DHCPDNS <-->|"Upstream DNS/DoT queries and NTP-assisted resolution dependencies"| EXT
-    VPN <-->|"Encrypted tunnels to VPN peers"| EXT
-    FWALL <-->|"NAT/port forwarding of inbound/outbound traffic"| EXT
+    RC -->|"starts/restarts daemons and reloads rules"| NETCORE
+    RC -->|"generates config and manages DHCP/DNS lifecycle"| DHCPDNS
+    RC -->|"controls WAN session setup/teardown"| WAN
+    RC -->|"applies firewall/NAT/QoS rules"| FWALL
+    RC -->|"manages VPN daemons and cert renewal"| VPN
+    RC -->|"starts/stops DPI and filtering services"| DPI
+
+    RC <-->|"reads/writes network service configuration"| NVRAM
+    NETCORE -->|"configures links/routes/bridges via netlink/ioctl"| KERNEL
+    DHCPDNS -->|"binds UDP/TCP sockets for DHCP/DNS service"| KERNEL
+    WAN -->|"creates PPP/tunnel interfaces and routes"| KERNEL
+    FWALL -->|"installs netfilter/qdisc rules"| KERNEL
+    VPN -->|"creates tunnel interfaces/xfrm state"| KERNEL
+    DPI -->|"inspects packets via netfilter/conntrack hooks"| KERNEL
+
+    DHCPDNS <-->|"DNS queries, DHCP leases, RA/DHCPv6"| EXT
+    WAN <-->|"PPP/ISP/tunnel control and data traffic"| EXT
+    VPN <-->|"Encrypted tunnel traffic to peers"| EXT

@@ -1,8 +1,12 @@
 flowchart LR
+    classDef proprietary fill:#fff5f5,stroke:#c92a2a,stroke-width:2px,color:#111;
+    classDef external fill:#f8f9fa,stroke:#495057,color:#111;
+
     RC["rc services/vpn/wireguard/ipsec\nSecurity/VPN/DPI orchestrator"]
     NVRAM["NVRAM config bus\nvpn_*, wgn*/wgs*, ipsec_*, bwdpi_*, wrs_*, snmp*, tor_*"]
     HTTPD["httpd/UI\nConfig/status pages"]
-    KERN["Kernel netfilter/xfrm/netlink/WireGuard"]
+    KERN["Kernel netfilter/xfrm/netlink/WireGuard"]:::external
+    EXT["External peers/services\nVPN peers, ACME, SNMP managers, Tor network"]:::external
 
     subgraph VPN["VPN"]
         OVPN["openvpn\nOpenVPN client/server"]
@@ -12,9 +16,9 @@ flowchart LR
     end
 
     subgraph DPI["DPI / Protection"]
-        BWDPI["bwdpi_source\nTrend Micro DPI/AiProtection engines (partly prebuilt)"]
+        BWDPI["bwdpi_source\nTrend Micro DPI/AiProtection engines"]:::proprietary
         URLF["urlfilterd\nNFQUEUE URL filter daemon"]
-        PTSRV["protect_srv/ptcsrv\nAiProtection service (prebuilt fallback)"]
+        PTSRV["protect_srv/ptcsrv\nAiProtection service"]:::proprietary
     end
 
     subgraph SEC["Security / Crypto / Mgmt"]
@@ -49,12 +53,12 @@ flowchart LR
     WG -->|"WireGuard netlink, ip/iptables/ip6tables"| KERN
     URLF -->|"NFQUEUE packet verdicts, /var/url_list"| KERN
     BWDPI -->|"netfilter/conntrack hooks, signature DB"| KERN
-    OVPN -->|"VPN tunnels to peers"| EXT["External VPN peers/ACME/SNMP managers/Tor network"]
+    OVPN -->|"VPN tunnels"| EXT
     SWAN -->|"IKE/IPsec tunnels"| EXT
     WG -->|"WireGuard tunnels"| EXT
     ACME -->|"ACME protocol/cert challenges"| EXT
     SNMP -->|"SNMP queries/traps"| EXT
     TOR -->|"Tor network circuits"| EXT
-    SSL -->|"TLS/crypto API used by daemons"| OVPN
-    SSL -->|"TLS/crypto API used by daemons"| HTTPD
-    SSL -->|"TLS/crypto API used by daemons"| ACME
+    SSL -->|"TLS/crypto API"| OVPN
+    SSL -->|"TLS/crypto API"| HTTPD
+    SSL -->|"TLS/crypto API"| ACME
