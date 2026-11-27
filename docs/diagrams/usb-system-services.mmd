@@ -1,0 +1,27 @@
+flowchart LR
+    RC["rc Init Orchestrator\nStarts USB, storage, discovery, and system daemons"]
+    NVRAM["NVRAM Config Store\nUSB/NAS/service enablement and policy settings"]
+    KERN["Linux Kernel / Sysfs / Udev\nBlock devices, USB stack, filesystems, process/runtime"]
+    EXT["External Devices/Clients\nUSB disks/modems/printers, LAN clients, mobile devices"]
+
+    subgraph SYS["Platform & Peripheral Services"]
+        USB["USB/Storage/Sharing\nusbclient/modeswitch, udev, ntfs/tuxera/e2fs/dosfstools, samba/vsftpd/lighttpd/minidlna/nfs"]
+        DISC["Discovery/UPnP/mDNS\navahi, mDNSResponder, miniupnpd, lldpd, networkmap"]
+        MISC["System Utilities/Daemons\nbusybox, syslog, ntpclient, cron/sched, sysstate, aura LED, nt_center, infosvr"]
+    end
+
+    RC -->|"Starts/stops storage and sharing services"| USB
+    RC -->|"Starts/stops discovery and network advertisement services"| DISC
+    RC -->|"Starts/stops system utilities and monitors"| MISC
+
+    USB <-->|"Reads share, mount, modem, and app settings"| NVRAM
+    DISC <-->|"Reads UPnP/mDNS/discovery settings"| NVRAM
+    MISC <-->|"Reads system, logging, LED, and schedule settings"| NVRAM
+
+    USB -->|"Mounts filesystems, manages devices, serves file/media protocols"| KERN
+    DISC -->|"Opens multicast/unicast sockets and advertises services"| KERN
+    MISC -->|"Runs scheduled jobs, logging, timers, and device control"| KERN
+
+    USB <-->|"USB mass storage, printers, modems, file/media access"| EXT
+    DISC <-->|"UPnP/mDNS/LLDP/service discovery with LAN clients"| EXT
+    MISC <-->|"NTP/syslog/infosvr interactions as configured"| EXT

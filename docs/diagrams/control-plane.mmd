@@ -1,0 +1,26 @@
+flowchart LR
+    ADMIN["Admin Browser\nOperator config/status interface"]
+
+    subgraph WEBPLANE["Web Management Plane"]
+        WWW["Web UI Assets (www/)\nASP pages, JS/CSS/images, model-specific UI files"]
+        HTTPD["httpd Web Server\nHTTP/CGI/EJ handling, auth, NVRAM-facing handlers"]
+        WEBAPI["Web/API Helpers\nlibwebapi, asuswebstorage, webdav_client, webs_scripts"]
+    end
+
+    subgraph CTRLPLANE["Control / Configuration Plane"]
+        RC["rc Init Orchestrator\nBoot sequencing, service start/stop, event handling"]
+        NVRAM["NVRAM Config Store\nPersistent key/value configuration and defaults overlay"]
+        SHARED["Shared Libraries/Utils\nboardapi, nvram wrappers, common helpers, IPC/event utilities"]
+        ROMFS["ROMFS Defaults/Scripts\nDefault config, certs, service scripts, prebuilt data"]
+    end
+
+    ADMIN <-->|"HTTP/HTTPS admin requests and responses"| HTTPD
+    HTTPD -->|"Serves ASP/JS/CSS assets"| WWW
+    HTTPD -->|"Invokes backend API/helper scripts"| WEBAPI
+    HTTPD <-->|"Reads/writes configuration values"| NVRAM
+    HTTPD -->|"Triggers apply/restart via rc actions/notify_rc"| RC
+    RC <-->|"Reads config and persists runtime state"| NVRAM
+    RC <-->|"Uses shared helpers and board/platform APIs"| SHARED
+    RC -->|"Loads defaults, certs, and helper scripts"| ROMFS
+    WEBAPI <-->|"Reads credentials/settings for cloud/update/webdav features"| NVRAM
+    WEBAPI <-->|"Calls external web services and firmware feed"| EXT["External Services\nFirmware feed, cloud/webdav endpoints"]

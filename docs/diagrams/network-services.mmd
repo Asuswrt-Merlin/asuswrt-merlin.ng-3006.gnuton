@@ -1,0 +1,40 @@
+flowchart LR
+    RC["rc Init Orchestrator\nStarts/stops network and security services"]
+    NVRAM["NVRAM Config Store\nService enablement, WAN/LAN/firewall/VPN settings"]
+    KERN["Linux Kernel / Netfilter\nInterfaces, routing, conntrack, iptables hooks"]
+    EXT["External Network Peers\nISP/WAN, VPN peers, DDNS/NTP/DNS services"]
+
+    subgraph NET["Networking & Security Services"]
+        NETCORE["Network Core\nbridge/bridge-utils, vlan, iproute2, ethtool, conntrack tools"]
+        DHCPDNS["DHCP/DNS Services\ndnsmasq, udhcpd/dhcpfwd, dns_ping, stubby"]
+        WAN["WAN/PPP/Tunnel Services\npppd, rp-pppoe, pptp-client, xl2tpd/l2tp, 6relayd, odhcp6c"]
+        FWALL["Firewall/NAT/QoS\niptables/ipset/ebtables rules, tc/qos, traffic monitor/rstats"]
+        VPN["VPN/Security Services\nOpenVPN, StrongSwan/IPsec, WireGuard, OpenSSL, easy-rsa, acme.sh"]
+        DPI["DPI/Parental/Protection\nbwdpi_source, urlfilterd, protect_srv, AiProtection hooks"]
+    end
+
+    RC -->|"Applies config and starts/stops daemons"| NETCORE
+    RC -->|"Applies config and starts/stops daemons"| DHCPDNS
+    RC -->|"Applies config and starts/stops daemons"| WAN
+    RC -->|"Regenerates rules and starts monitors"| FWALL
+    RC -->|"Starts VPN daemons and cert/keys workflows"| VPN
+    RC -->|"Starts DPI/filter engines and policy hooks"| DPI
+
+    NETCORE <-->|"Reads interface/bridge/VLAN settings"| NVRAM
+    DHCPDNS <-->|"Reads lease/DNS/DHCP settings"| NVRAM
+    WAN <-->|"Reads WAN protocol/credentials/settings"| NVRAM
+    FWALL <-->|"Reads firewall/NAT/QoS/port-forward settings"| NVRAM
+    VPN <-->|"Reads VPN keys/policies/server-client settings"| NVRAM
+    DPI <-->|"Reads parental control/AiProtection settings"| NVRAM
+
+    NETCORE -->|"Configures links, bridges, VLANs, routes via ip/sysfs"| KERN
+    DHCPDNS -->|"Binds UDP/TCP DNS/DHCP sockets"| KERN
+    WAN -->|"Creates PPP/tunnel interfaces and routes"| KERN
+    FWALL -->|"Installs iptables/ipset/ebtables/tc rules"| KERN
+    VPN -->|"Creates tunnel interfaces and crypto sockets"| KERN
+    DPI -->|"Hooks packet inspection and policy enforcement"| KERN
+
+    WAN <-->|"PPP/DHCP/IPv6 WAN connectivity"| EXT
+    DHCPDNS <-->|"Upstream DNS/DoT queries and NTP-assisted resolution dependencies"| EXT
+    VPN <-->|"Encrypted tunnels to VPN peers"| EXT
+    FWALL <-->|"NAT/port forwarding of inbound/outbound traffic"| EXT

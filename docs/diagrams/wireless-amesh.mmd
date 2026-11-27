@@ -1,0 +1,23 @@
+flowchart LR
+    RC["rc Init Orchestrator\nStarts wireless, WPA/WPS, and AiMesh services"]
+    NVRAM["NVRAM Config Store\nSSID, security, radio, band-steering, AiMesh settings"]
+    KERN["Linux Kernel\nNetlink, sockets, interface state"]
+    BRCMDRV["Broadcom Platform Drivers\nbcmdrivers, shared, RDP, ethernet/switch/accelerator"]
+    WLDRV["Broadcom WL Driver Stack\nbcmdrivers/.../net/wl, shared WL interfaces, dhd"]
+
+    subgraph WLAN["Wireless & AiMesh Services"]
+        WLCTRL["WiFi Control\nwlceventd, wlc_nt, wps/wsc, 802.1x/eapd, bsd"]
+        AMAS["AiMesh/Roaming\namas-utils, mapd, asd/asd2.1, steering/mesh policy"]
+    end
+
+    RC -->|"Starts/restarts wireless and mesh daemons"| WLCTRL
+    RC -->|"Starts/restarts AiMesh and roaming daemons"| AMAS
+    WLCTRL <-->|"Reads radio/security/WPS configuration"| NVRAM
+    AMAS <-->|"Reads mesh topology, steering, and node settings"| NVRAM
+
+    WLCTRL -->|"Configures AP/STA/VIF via wl ioctl/IOVAR"| WLDRV
+    AMAS -->|"Controls roaming/steering/mesh via WL and service interfaces"| WLDRV
+    WLCTRL <-->|"Receives wireless events and interface state notifications"| KERN
+    AMAS <-->|"Uses network sockets for mesh/backhaul coordination"| KERN
+    WLDRV -->|"Uses Broadcom driver/platform APIs"| BRCMDRV
+    BRCMDRV -->|"Registers devices and handles hardware interrupts/data paths"| KERN

@@ -1,26 +1,24 @@
 flowchart TB
-    subgraph REPO["Repository / Source of Truth"]
-        DOCS["Docs & Metadata\nAGENTS.md, README*, Changelog-3006.txt\nLicense, SUPPORT.md"]
-        TOOLS["Repo Tools\ntools/\n- get-last-notes.py\n- copy-prebuilt*\n- make-model-prebuild.sh\n- make-www-sysdep.sh\n- bootloaders-copy.sh"]
-        UPDATES["Update Feed\nupdates/\n- manifest_3006.txt\n- 3006_*_note.txt"]
-        CI["CI/CD\n.github/workflows/github-actions.yml"]
-        SRC["Firmware Source\nrelease/"]
+    ADMIN["Admin Browser\nWeb-based router administration UI"]
+    EXT["External Services\nFirmware feed, DDNS, NTP, VPN peers, cloud services"]
+
+    subgraph FW["AsusWrt-Merlin.ng 3006 Router Firmware"]
+        WEB["Web Management\nhttpd + ASP/CGI UI for configuration and status"]
+        CTRL["Control Plane\nrc/init orchestration, NVRAM config, shared libs, ROMFS defaults"]
+        NET["Network Services\nLAN/WAN routing, DHCP/DNS, firewall/NAT/QoS, VPN, DPI"]
+        WLAN["Wireless & AiMesh\nWiFi control, WPA/WPS, mesh/roaming, Broadcom WL stack"]
+        SYS["Platform Services\nUSB/storage/sharing, discovery/UPnP/mDNS, system daemons"]
+        KERN["Kernel & Drivers\nLinux 4.19, Broadcom platform/WL drivers, boot chain"]
     end
 
-    subgraph SRC_TREE["release/ Source Tree"]
-        SRC_COMMON["release/src/\nCommon userland/build helpers\nrouter/, btools/, ctools/, lzma*,\nasustools/, shared libs/tools"]
-        SRC_RT_SHARED["release/src-rt/\nShared RT config/fragments\ntarget.mak, version.conf,\nplatform.mak, profile*.mak"]
-        SDK_BE["release/src-rt-5.04behnd.4916/\nPrimary BE SDK (CI)\nkernel, bcmdrivers, bootloaders,\nhostTools, targets, userspace,\nrouter-sysdep*, make*.mak"]
-        SDK_OTHER["Other SDK trees\nsrc-rt-5.02axhnd*\nsrc-rt-5.04axhnd.675x\n(legacy/other platform baselines)"]
-        IMG["release/image/\nImage output area"]
-    end
-
-    CI -->|builds model matrix| SDK_BE
-    CI -->|reads/writes version/feed metadata| SRC_RT_SHARED
-    CI -->|publishes release assets + manifest| UPDATES
-    TOOLS --> CI
-    SRC --> SRC_COMMON
-    SRC --> SRC_RT_SHARED
-    SRC --> SDK_BE
-    SRC --> SDK_OTHER
-    SRC --> IMG
+    ADMIN -->|"HTTPS/HTTP requests for status and configuration"| WEB
+    WEB -->|"NVRAM reads/writes and rc service actions"| CTRL
+    CTRL -->|"Service start/stop/restart and config application"| NET
+    CTRL -->|"Wireless service orchestration and config application"| WLAN
+    CTRL -->|"USB/system service orchestration and config application"| SYS
+    NET -->|"Netfilter, sockets, routing, and interface control"| KERN
+    WLAN -->|"WL ioctl/IOVAR and driver events"| KERN
+    SYS -->|"Block/device/filesystem and daemon runtime support"| KERN
+    NET <-->|"WAN protocols, VPN tunnels, DNS/NTP/DDNS traffic"| EXT
+    WEB <-->|"Firmware update checks and web API integrations"| EXT
+    SYS <-->|"USB devices, storage media, and mobile peripherals"| EXT
