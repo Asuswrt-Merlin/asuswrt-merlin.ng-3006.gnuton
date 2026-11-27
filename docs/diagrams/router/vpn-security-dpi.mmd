@@ -1,0 +1,60 @@
+flowchart LR
+    RC["rc services/vpn/wireguard/ipsec\nSecurity/VPN/DPI orchestrator"]
+    NVRAM["NVRAM config bus\nvpn_*, wgn*/wgs*, ipsec_*, bwdpi_*, wrs_*, snmp*, tor_*"]
+    HTTPD["httpd/UI\nConfig/status pages"]
+    KERN["Kernel netfilter/xfrm/netlink/WireGuard"]
+
+    subgraph VPN["VPN"]
+        OVPN["openvpn\nOpenVPN client/server"]
+        SWAN["strongswan\nIKE/IPsec suite"]
+        WG["wireguard-tools\nwg/wg-quick userspace"]
+        IPSEC["rc_ipsec glue\nIPsec config generation"]
+    end
+
+    subgraph DPI["DPI / Protection"]
+        BWDPI["bwdpi_source\nTrend Micro DPI/AiProtection engines (partly prebuilt)"]
+        URLF["urlfilterd\nNFQUEUE URL filter daemon"]
+        PTSRV["protect_srv/ptcsrv\nAiProtection service (prebuilt fallback)"]
+    end
+
+    subgraph SEC["Security / Crypto / Mgmt"]
+        ACME["acme.sh\nACME/Let's Encrypt cert issuance"]
+        SSL["openssl-1.1/3.5/compat\nTLS/crypto libraries"]
+        SNMP["net-snmp\nSNMP agent"]
+        TOR["tor\nTor anonymity daemon"]
+    end
+
+    HTTPD -->|"reads/writes VPN/DPI/security settings"| NVRAM
+    HTTPD -->|"notify_rc apply/restart"| RC
+    RC -->|"start/stop/configure OpenVPN"| OVPN
+    RC -->|"start/stop/configure strongSwan"| SWAN
+    RC -->|"start/stop/configure WireGuard"| WG
+    RC -->|"generate IPsec config, start/stop"| IPSEC
+    RC -->|"start/stop bwdpi checks/services"| BWDPI
+    RC -->|"start/stop URL filter rules/daemon"| URLF
+    RC -->|"start/stop protection service"| PTSRV
+    RC -->|"run cert issuance/renewal"| ACME
+    RC -->|"start/stop snmpd, generate snmpd.conf"| SNMP
+    RC -->|"start/stop tor"| TOR
+
+    OVPN <-->|"writes vpn_*_errno/state, reads vpn_* config"| NVRAM
+    WG <-->|"reads wgn*/wgs* keys"| NVRAM
+    SWAN <-->|"reads ipsec_*/ca/profile keys"| NVRAM
+    IPSEC -->|"generates strongSwan/ipsec config"| SWAN
+    BWDPI <-->|"reads bwdpi_*/sig_*/wrs_*/qos_*"| NVRAM
+    SNMP <-->|"reads snmpd_enable/v3_*/community/sys* keys"| NVRAM
+
+    OVPN -->|"TUN/TAP, routes, netfilter hooks"| KERN
+    SWAN -->|"xfrm policies/state, VICI/control"| KERN
+    WG -->|"WireGuard netlink, ip/iptables/ip6tables"| KERN
+    URLF -->|"NFQUEUE packet verdicts, /var/url_list"| KERN
+    BWDPI -->|"netfilter/conntrack hooks, signature DB"| KERN
+    OVPN -->|"VPN tunnels to peers"| EXT["External VPN peers/ACME/SNMP managers/Tor network"]
+    SWAN -->|"IKE/IPsec tunnels"| EXT
+    WG -->|"WireGuard tunnels"| EXT
+    ACME -->|"ACME protocol/cert challenges"| EXT
+    SNMP -->|"SNMP queries/traps"| EXT
+    TOR -->|"Tor network circuits"| EXT
+    SSL -->|"TLS/crypto API used by daemons"| OVPN
+    SSL -->|"TLS/crypto API used by daemons"| HTTPD
+    SSL -->|"TLS/crypto API used by daemons"| ACME

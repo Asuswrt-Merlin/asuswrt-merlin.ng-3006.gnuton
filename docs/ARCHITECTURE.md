@@ -19,6 +19,10 @@ Analysis based on the 3006 firmware line in this repository. Key sources: `AGENT
 
 A detailed RC `start_*` service catalog and orchestration overview is available in [rc-services.md](rc-services.md).
 
+## Router Component Catalog
+
+A component-level catalog for `release/src/router` (purpose, connections, NVRAM keys/prefixes, IPC/bus mechanisms, and domain diagrams) is available in [router-components.md](router-components.md).
+
 ## 1) System Architecture
 
 This graph shows the major firmware applications/subsystems and their purposes. Edges are labeled with the primary interaction or data flow.

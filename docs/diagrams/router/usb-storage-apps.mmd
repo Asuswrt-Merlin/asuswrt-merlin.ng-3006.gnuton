@@ -1,0 +1,52 @@
+flowchart TB
+    RC["rc/usb.c + services.c\nUSB/storage/app orchestrator"]
+    NVRAM["NVRAM config bus\nusb_*, enable_ftp/samba/nfsd, dms_*, st_*_mode, acc_*, timemachine_*"]
+    HOT["hotplug2 / udev\nHotplug event handlers"]
+    KERN["Kernel / sysfs / block / USB / FUSE / nfsd"]
+
+    subgraph STORAGE["Storage / Disk"]
+        LIBDISK["libdisk\nDisk init/mount/share/account/config generation"]
+        FS["ntfs-3g / tuxera / e2fsprogs / diskdev_cmds / mtd-utils\nFilesystem and disk tools"]
+    end
+
+    subgraph FILE["File / Media Sharing"]
+        SMB["samba-3.6.x_opwrt / sambaclient\nSMB/CIFS server/client"]
+        FTP["vsftpd-3.x\nFTP server"]
+        NFS["nfs-utils-1.3.4\nNFS server utilities"]
+        DLNA["minidlna\nDLNA media server"]
+        WDAV["lighttpd + webdav_client\nWebDAV/HTTP storage service"]
+        TM["netatalk-3.0.5\nAFP/Time Machine"]
+    end
+
+    subgraph CLOUD["Cloud / USB Apps"]
+        AWS["asuswebstorage / dropbox_client / ftpclient\nCloud/transfer clients"]
+        USBM["usb-modeswitch / usbmode / usbclient\nUSB modem/mode/client utilities"]
+        PRINT["LPRng\nLPD/USB printer sharing"]
+    end
+
+    RC -->|"notify_rc/start/stop, module load/mount/umount"| HOT
+    RC -->|"start/stop/restart services, generate configs"| SMB
+    RC -->|"start/stop FTP"| FTP
+    RC -->|"start/stop NFS, exportfs"| NFS
+    RC -->|"start/stop/rebuild/rescan DMS"| DLNA
+    RC -->|"start/stop WebDAV"| WDAV
+    RC -->|"start/stop timemachine/afpd"| TM
+    RC -->|"start/stop cloud/usb helpers"| AWS
+    RC -->|"invoke mode switch/client tools"| USBM
+    RC -->|"manage printer/LPD state"| PRINT
+
+    HOT -->|"netlink uevents -> rule actions"| RC
+    LIBDISK -->|"generates smb.conf, webdav conf, var/share files"| SMB
+    LIBDISK -->|"generates account/share metadata"| FTP
+    LIBDISK -->|"disk/share state files in /tmp/jffs"| RC
+    FS -->|"mount/mkfs/fsck CLI, FUSE/modules"| KERN
+    NFS -->|"rpc.nfsd/exportfs, /proc/fs/nfsd, /etc/exports"| KERN
+    SMB <-->|"reads enable_samba/st_samba/acc_* keys"| NVRAM
+    FTP <-->|"reads enable_ftp/st_ftp/acc_* keys"| NVRAM
+    DLNA <-->|"reads dms_* keys"| NVRAM
+    WDAV <-->|"reads st_webdav_mode/webdav keys"| NVRAM
+    TM <-->|"reads timemachine_enable/daapd_enable"| NVRAM
+    PRINT <-->|"reads lprng_*/MFP_busy/u2ec_busyip/lan_ipaddr"| NVRAM
+    LIBDISK <-->|"reads acc_*/usb path/fs keys"| NVRAM
+    RC <-->|"reads/writes usb/storage/service config"| NVRAM
+    STORAGE -->|"block/device/sysfs/mount operations"| KERN

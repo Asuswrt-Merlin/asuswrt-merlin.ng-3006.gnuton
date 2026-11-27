@@ -1,0 +1,32 @@
+flowchart TB
+    subgraph BUS["Primary Inter-Component Buses"]
+        NVRAM["NVRAM Config Bus\nnvram/libnvram + /dev/nvram ioctl+mmap\nPersistent key/value state shared by most components"]
+        RCNOTIFY["RC Service Bus\nnotify_rc() + init SIGUSR1 handle_notifications()\nService start/stop/restart/apply requests"]
+        SIGNAL["Signal / PID Bus\nkillall_tk, kill_pidfile_s, SIGHUP/SIGTERM/SIGUSR*\nDaemon lifecycle and reload"]
+        SOCK["Local Socket/IPC Bus\nUnix domain sockets, UDP local, event sockets\ncfg_mnt, nt_center, aaews, wpa_ctrl, etc."]
+        NETLINK["Kernel Control/Event Bus\nnetlink, ioctl, wl IOVAR, NFQUEUE, uevents\nnetwork/wireless/firewall/hotplug"]
+        FSIPC["File/SHM Config Bus\n/tmp,/etc,/var/run,/jffs, shared memory, pidfiles\nGenerated configs, state, locks, JSON/DB"]
+    end
+
+    HTTPD["httpd/www\nAdmin UI"]
+    RC["rc\nOrchestrator"]
+    SERVICES["Router daemons\nnetwork, wireless, usb, vpn, dpi"]
+    KERNEL["Kernel/drivers"]
+    EXTERNAL["External clients/networks/devices"]
+
+    HTTPD -->|"reads/writes config"| NVRAM
+    HTTPD -->|"apply/restart request"| RCNOTIFY
+    RC -->|"consumes notifications"| RCNOTIFY
+    RC -->|"reads/writes config"| NVRAM
+    SERVICES -->|"read config / write state"| NVRAM
+    RC -->|"start/stop/reload"| SIGNAL
+    SERVICES -->|"pidfiles/signals"| SIGNAL
+    RC <-->|"local IPC where supported"| SOCK
+    SERVICES <-->|"daemon-to-daemon local IPC"| SOCK
+    SERVICES -->|"netfilter/route/link/wifi/hotplug control"| NETLINK
+    RC -->|"interface/firewall/system control"| NETLINK
+    NETLINK -->|"kernel events and state"| KERNEL
+    RC -->|"generates configs/scripts"| FSIPC
+    SERVICES -->|"read/write configs/state/locks"| FSIPC
+    HTTPD -->|"HTTP/HTTPS"| EXTERNAL
+    SERVICES -->|"network protocols/services"| EXTERNAL

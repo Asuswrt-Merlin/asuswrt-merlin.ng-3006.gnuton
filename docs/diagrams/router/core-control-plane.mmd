@@ -1,0 +1,43 @@
+flowchart LR
+    ADMIN["Admin Browser\nUI/operator"]
+    HTTPD["httpd\nEmbedded web admin server\nCGI/ASP/EJ, auth, config pages"]
+    WWW["www/\nASP/HTML/JS UI assets"]
+    RC["rc\nInit/service orchestrator\nboot, lifecycle, apply config"]
+    NVRAM["nvram/libnvram\nPersistent key-value config store\n/dev/nvram ioctl+mmap"]
+    SHARED["shared/libshared\nCommon helpers\nnvram wrappers, notify_rc, pid/signal utils"]
+    CFG["cfg_mnt\nAiMesh config sync/management\ncfg_server/client/reportstatus"]
+    NTC["nt_center\nNotification Center\nevent storage/push/mail"]
+    NMAP["networkmap\nClient discovery/topology\nasusdiscovery/arpstorm"]
+    INF["infosvr\nASUS device discovery responder"]
+    SYS["sysstate\nSystem state/log helpers\nsysstate/asuslog (prebuilt)"]
+    EVT["eventd\nEvent daemon (prebuilt)"]
+    ARBD["asus_rbd\nRouter Boost daemon (prebuilt)"]
+    ROM["rom/\nROMFS defaults/scripts/certs"]
+    KERN["Kernel/proc/sysfs/dev\nplatform services"]
+
+    ADMIN -->|"HTTP/HTTPS config/status requests"| HTTPD
+    HTTPD -->|"serves UI templates/assets"| WWW
+    HTTPD -->|"reads/writes config keys"| NVRAM
+    HTTPD -->|"notify_rc / rc service apply-restart"| RC
+    RC -->|"reads/writes config state"| NVRAM
+    RC -->|"uses shared APIs/helpers"| SHARED
+    RC -->|"loads defaults/scripts/certs"| ROM
+    RC -->|"start/stop/manage daemons"| CFG
+    RC -->|"start/stop/manage daemons"| NTC
+    RC -->|"start/stop/manage daemons"| NMAP
+    RC -->|"start/stop/manage daemons"| INF
+    RC -->|"start/stop/manage daemons"| SYS
+    RC -->|"start/stop/manage daemons"| EVT
+    RC -->|"start/stop/manage daemons"| ARBD
+    CFG <-->|"Unix IPC /var/run/cfgmnt_ipc_socket\nJSON config/event sync"| RC
+    CFG <-->|"reads/writes config/state"| NVRAM
+    NTC <-->|"event socket send_notify_event/socketpath"| RC
+    NMAP -->|"shared memory SHMKEY_*, /tmp,/jffs JSON/lock files"| NMAP
+    NMAP <-->|"reads/writes discovery/config state"| NVRAM
+    INF -->|"UDP discovery responses port 9999"| ADMIN
+    INF <-->|"reads identity/network config"| NVRAM
+    SYS <-->|"status/log data, respipc (prebuilt)"| RC
+    EVT <-->|"event bus (prebuilt)"| RC
+    ARBD <-->|"RouterBoost/AiMesh/QoS state"| NVRAM
+    NVRAM <-->|"ioctl+mmap NVRAM_MAGIC"| KERN
+    SHARED -->|"notify_rc API, pid/signal/file lock helpers"| RC

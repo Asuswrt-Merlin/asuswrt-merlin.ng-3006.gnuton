@@ -1,0 +1,49 @@
+flowchart LR
+    RC["rc / wireless.c / services.c\nWireless service orchestrator"]
+    NVRAM["NVRAM config bus\nwl*, amas_*, wps_*, hapd_*, ssid/security/channel keys"]
+
+    subgraph AUTH["Auth / WPS / Event"]
+        EAP["802.1x rtdot1xd\nRT_WIFI 802.1X authenticator/RADIUS relay"]
+        WPA["wpa_supplicant/wpa_cli\nWPA/802.1X supplicant"]
+        WPS["wsc_upnp / wpsaide / wps-broadcom\nWPS UPnP/control helpers"]
+        WLEV["wlceventd (prebuilt)\nBroadcom wireless event daemon"]
+        WLCNT["wlc_nt/wlc_monitor (prebuilt)\nWireless notification/monitor"]
+    end
+
+    subgraph MESH["AiMesh / Steering"]
+        AMAS["amas-utils + AMAS services\nAiMesh library/orchestration\nbhctrl/lanctrl/ssd/status/misc"]
+        BSD["bsd (prebuilt)\nBroadcom Band Steering Daemon"]
+        MAPD["mapd\nMediatek MAP/EasyMesh 1905+WAPP"]
+        ASD["asd / asd2.1 (prebuilt)\nASUS feature/security daemon"]
+        AAE["aaews/mastiff/aaeuac (prebuilt)\nAAE/AiCloud service"]
+    end
+
+    WLDRV["Broadcom/RT_WIFI driver stack\nwl/dhd/ioctl/netlink/events"]
+    KERN["Kernel / netlink / ioctl"]
+
+    RC -->|"start/stop/restart notify_rc, signals"| EAP
+    RC -->|"start_hapd_wpasupp / stop_wpa_supplicant"| WPA
+    RC -->|"start_wps/stop_wps/wps_pbcd/wpsaide"| WPS
+    RC -->|"start/stop wlceventd"| WLEV
+    RC -->|"start/stop wlc_nt/wlc_monitor"| WLCNT
+    RC -->|"start/stop amas_* services"| AMAS
+    RC -->|"start/stop bsd, gen_bcmbsd_def_policy"| BSD
+    RC -->|"start/stop asd"| ASD
+    RC -->|"aaews sdk init/reg/unreg dispatch"| AAE
+
+    EAP -->|"RT_PRIV_IOCTL OID_802_DOT1X_*, raw EAPOL sockets"| WLDRV
+    WPA -->|"wpa control sockets, driver ops"| WLDRV
+    WPS -->|"ioctl_sock + netlink/msg queue, UPnP"| WLDRV
+    WLEV -->|"eventfd/local loopback, wl private events"| WLDRV
+    WLCNT -->|"libwlc_nt_client event/notification IPC"| WLEV
+    AMAS -->|"amas APIs, LLDP binding, /tmp/misc.json"| RC
+    AMAS <-->|"amas_* service-ready/bdl keys"| NVRAM
+    BSD -->|"wl/wlcsm band-steering policy/control"| WLDRV
+    MAPD -->|"1905/WAPP/dot11 interfaces, /etc/map*"| WLDRV
+    ASD -->|"libasd.so plugin API (prebuilt)"| RC
+    AAE -->|"Unix IPC /var/run/aaews_ipc_socket"| RC
+
+    RC <-->|"reads/writes wl/amas/wps/hapd config"| NVRAM
+    WLDRV -->|"ioctl/netlink/driver events"| KERN
+    EAP -->|"RADIUS UDP auth packets"| EXT["External RADIUS / clients"]
+    WPA -->|"802.1X/EAPOL authentication"| EXT
