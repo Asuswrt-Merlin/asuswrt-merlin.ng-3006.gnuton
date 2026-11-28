@@ -1,0 +1,47 @@
+flowchart TB
+    classDef proprietary fill:#fff5f5,stroke:#c92a2a,stroke-width:2px,color:#111;
+
+    INIT["init/rc boot\nSystem initialization and main control loop"]
+    SS["start_services()\nCore service orchestrator in services.c"]
+    LAN["start_lan()\nLAN/bridge/VLAN/WiFi bringup in lan.c"]
+    WAN["start_wan() / start_wan_if()\nWAN interface and protocol bringup in wan.c"]
+    USB["start_usb()\nUSB device/storage initialization in usb.c"]
+    WL["start_wl() / start_wireless()\nWireless radio/interface initialization"]
+    FW["start_firewall()\nNetfilter/firewall/NAT rule application in firewall.c"]
+    JFFS["start_jffs2()/start_ubifs()\nPersistent writable filesystem mount"]
+
+    SS -->|"starts/stops core daemons"| CORE["Core/System Services\nsyslogd/klogd/logger, hotplug2, cron, ntp, watchdogs, LEDs"]
+    SS -->|"starts/stops network daemons"| NETSVC["Network Services\ndnsmasq, stubby, httpd, upnp, networkmap, wanduck, sshd, snmpd"]
+    SS -->|"starts/stops wireless daemons"| WLSVC["Wireless Services\neapd, nas/wpa, wlceventd, bsd, asd, AMAS, wps"]
+    SS -->|"starts/stops security daemons"| SECSVC["Security/VPN/DPI\nOpenVPN/WireGuard hooks, BWDPI checks, letsencrypt, conn_diag"]
+    SS -->|"starts/stops USB/app daemons"| USBSVC["USB/App Services\nnas_services, samba, ftpd, minidlna/DMS, webdav, timemachine"]
+    SS -->|"starts/stops feature daemons"| FEAT["Feature Daemons\naura RGB, AiCloud/awsiot, infosvr, nt_center, sysstate"]
+
+    WLSVC -.->|"includes prebuilt/proprietary components"| PROP["Prebuilt/proprietary examples\nasd, wlceventd, bsd, amas-utils libs"]:::proprietary
+
+    LAN -->|"configures LAN interfaces/bridge/VLAN"| BR["Bridge/VLAN/LAN IF\nstart_vlan, start_lan_port, start_lan_wl, DHCP/DNS reload"]
+    WAN -->|"brings up WAN protocol/interface"| WANIF["WAN Interface Bringup\nDHCP/PPPoE/USB modem, start_wan6, 6relayd/dhcp6c/rdisc6"]
+    WAN -->|"applies WAN-dependent features"| WANFEAT["WAN Features\nVPN client/server hooks, QoS, firewall, DDNS, UPnP, routes"]
+    USB -->|"starts NAS/app stack"| NAS["NAS/App Stack\nstart_nas_services, samba, ftpd, DMS, webdav, timemachine"]
+
+    NVRAM["NVRAM Config Bus\nnvram/* shared/* persistent key-value config"]
+    HTTPD["httpd Web Backend\nCGI/ASP handlers in httpd/* serving www/*"]
+    RCMD["RC Dispatcher\nrc rc_service / notify_rc event handling"]
+
+    INIT -->|"invokes during boot"| SS
+    INIT -->|"invokes during boot"| LAN
+    INIT -->|"invokes during boot"| WAN
+    INIT -->|"invokes during boot"| USB
+    INIT -->|"invokes during boot"| WL
+    INIT -->|"invokes during boot"| FW
+    INIT -->|"invokes during boot"| JFFS
+
+    NVRAM <-->|"reads/writes service configuration"| SS
+    NVRAM <-->|"reads/writes LAN configuration"| LAN
+    NVRAM <-->|"reads/writes WAN configuration"| WAN
+    NVRAM <-->|"reads/writes UI/config state"| HTTPD
+    HTTPD -->|"applies settings via rc service actions"| RCMD
+    RCMD -->|"dispatches service start/stop/restart"| SS
+    RCMD -->|"dispatches LAN reconfiguration"| LAN
+    RCMD -->|"dispatches WAN reconfiguration"| WAN
+    RCMD -->|"dispatches firewall reload"| FW

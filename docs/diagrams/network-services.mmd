@@ -1,0 +1,43 @@
+flowchart TB
+    classDef proprietary fill:#fff5f5,stroke:#c92a2a,stroke-width:2px,color:#111;
+    classDef external fill:#f8f9fa,stroke:#495057,color:#111;
+
+    RC["rc Service Orchestrator\nStarts/stops network daemons and applies config"]
+    NVRAM["NVRAM Config Store\nLAN/WAN/DHCP/DNS/firewall/VPN/DPI settings"]
+
+    subgraph CORE["Network Core"]
+        NETCORE["Network Core Utilities\nbridge/bridge-utils, vlan, iproute2, ethtool, conntrack\nInterface, route, bridge, and neighbor management"]
+    end
+
+    subgraph EDGE["Edge Network Services"]
+        DHCPDNS["DHCP/DNS Service\ndnsmasq, udhcpd/dhcpfwd, dns_ping\nAddress assignment and name resolution"]
+        WAN["WAN/PPP/Tunnel Services\npppd, rp-pppoe, pptp-client, xl2tpd/l2tp, 6relayd, odhcp6c\nWAN link establishment and IPv6 transition"]
+        FWALL["Firewall/NAT/QoS\niptables/ipset/ebtables, rc firewall logic, tc/qos, rstats\nTraffic filtering, NAT, shaping, accounting"]
+    end
+
+    subgraph SEC["Security Services"]
+        VPN["VPN/Security Services\nOpenVPN, StrongSwan/IPsec, WireGuard, OpenSSL, easy-rsa, acme.sh\nEncrypted tunnels and certificate management"]
+        DPI["DPI/Parental Protection\nbwdpi_source, urlfilterd, protect_srv\nTraffic inspection and policy enforcement"]:::proprietary
+    end
+
+    KERNEL["Linux Kernel Networking\nnetfilter, routing, interfaces, xfrm/WireGuard"]:::external
+    EXT["External Networks/Peers\nISP, DNS servers, VPN peers, web services"]:::external
+
+    RC -->|"starts/restarts daemons and reloads rules"| NETCORE
+    RC -->|"generates config and manages DHCP/DNS lifecycle"| DHCPDNS
+    RC -->|"controls WAN session setup/teardown"| WAN
+    RC -->|"applies firewall/NAT/QoS rules"| FWALL
+    RC -->|"manages VPN daemons and cert renewal"| VPN
+    RC -->|"starts/stops DPI and filtering services"| DPI
+
+    RC <-->|"reads/writes network service configuration"| NVRAM
+    NETCORE -->|"configures links/routes/bridges via netlink/ioctl"| KERNEL
+    DHCPDNS -->|"binds UDP/TCP sockets for DHCP/DNS service"| KERNEL
+    WAN -->|"creates PPP/tunnel interfaces and routes"| KERNEL
+    FWALL -->|"installs netfilter/qdisc rules"| KERNEL
+    VPN -->|"creates tunnel interfaces/xfrm state"| KERNEL
+    DPI -->|"inspects packets via netfilter/conntrack hooks"| KERNEL
+
+    DHCPDNS <-->|"DNS queries, DHCP leases, RA/DHCPv6"| EXT
+    WAN <-->|"PPP/ISP/tunnel control and data traffic"| EXT
+    VPN <-->|"Encrypted tunnel traffic to peers"| EXT

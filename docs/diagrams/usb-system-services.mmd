@@ -1,0 +1,38 @@
+flowchart TB
+    classDef proprietary fill:#fff5f5,stroke:#c92a2a,stroke-width:2px,color:#111;
+    classDef external fill:#f8f9fa,stroke:#495057,color:#111;
+
+    RC["rc Service Orchestrator\nStarts/stops USB, storage, discovery, and system daemons"]
+    NVRAM["NVRAM Config Store\nUSB, sharing, service, LED, and feature settings"]
+    KERNEL["Linux Kernel / Device Drivers\nUSB, block, filesystem, netdev, sysfs/procfs"]:::external
+    DEVICES["USB/Storage/Mobile Devices\nDisks, printers, modems, peripherals"]:::external
+    CLIENTS["LAN/Internet Clients\nSMB/NFS/DLNA/UPnP/mDNS clients"]:::external
+
+    subgraph USB["USB / Storage / Sharing"]
+        USBST["USB/Storage/Sharing Services\nusbclient, usb-modeswitch, udev, ntfs-3g/tuxera/e2fs/dosfstools\nsamba, vsftpd, lighttpd, minidlna, nfs\nDevice mounting and file/media sharing"]:::proprietary
+    end
+
+    subgraph DISC["Discovery / UPnP / mDNS"]
+        DISCOV["Discovery Services\navahi, mDNSResponder, miniupnpd, lldpd, networkmap\nService advertisement, discovery, topology, port mapping"]
+    end
+
+    subgraph SYS["System Utilities / Daemons"]
+        MISC["System Utilities/Daemons\nbusybox, syslog, ntpclient, cron/sched, sysstate\naura LED, nt_center, infosvr\nGeneral system operation and maintenance"]
+    end
+
+    RC -->|"detects devices, mounts volumes, starts sharing services"| USBST
+    RC -->|"starts discovery/advertisement/port-mapping services"| DISCOV
+    RC -->|"starts system and maintenance daemons"| MISC
+    RC <-->|"reads/writes service configuration"| NVRAM
+
+    USBST <-->|"reads/writes USB/share/media settings"| NVRAM
+    DISCOV <-->|"reads/writes discovery/UPnP/topology settings"| NVRAM
+    MISC <-->|"reads/writes system/feature settings"| NVRAM
+
+    USBST -->|"udev events, block/fs mounts, device I/O"| KERNEL
+    DISCOV -->|"network sockets, multicast, netlink/interface state"| KERNEL
+    MISC -->|"sysfs/procfs, timers, device control"| KERNEL
+
+    USBST <-->|"USB attach/remove, storage and peripheral access"| DEVICES
+    USBST <-->|"SMB/FTP/HTTP/DLNA/NFS file sharing"| CLIENTS
+    DISCOV <-->|"mDNS/SSDP/LLDP/UPnP discovery and mapping"| CLIENTS

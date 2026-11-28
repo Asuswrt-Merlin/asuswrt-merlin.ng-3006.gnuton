@@ -42,6 +42,12 @@ fix issues and make minor functionality adjustments while keeping the original
 Asus firmware featureset. This fork adds support for additional router models
 on top of [RMerl/asuswrt-merlin.ng](https://github.com/RMerl/asuswrt-merlin.ng).
 
+## Documentation
+
+- [Architecture overview](docs/ARCHITECTURE.md) — system/runtime/component diagrams, RC orchestration, and architectural constraints.
+- [Router component catalog](docs/router-components.md) — `release/src/router` component purposes, connections, NVRAM keys/prefixes, and IPC/bus mechanisms.
+- [RC service catalog](docs/rc-services.md) — `start_*`/service orchestration details.
+
 ## Building
 
 The GitHub Actions workflow builds the model matrix in the GNUton toolchain

@@ -1,0 +1,28 @@
+flowchart TB
+    classDef proprietary fill:#fff5f5,stroke:#c92a2a,stroke-width:2px,color:#111;
+    classDef external fill:#f8f9fa,stroke:#495057,color:#111;
+
+    ADMIN["Admin Browser\nWeb-based router administration UI"]:::external
+    EXT["External Services\nFirmware feed, DDNS, NTP, VPN peers, cloud services"]:::external
+
+    subgraph FW["AsusWrt-Merlin.ng 3006 Router Firmware"]
+        direction TB
+        WEB["Web Management\nhttpd + ASP/CGI UI\nConfiguration and status"]
+        CTRL["Control Plane\nrc/init orchestration\nNVRAM config, shared libs, ROMFS defaults"]
+        NET["Network Services\nLAN/WAN routing, DHCP/DNS\nFirewall/NAT/QoS, VPN, DPI"]
+        WLAN["Wireless & AiMesh\nWiFi control, WPA/WPS\nMesh/roaming, Broadcom WL stack"]
+        SYS["Platform Services\nUSB/storage/sharing\nDiscovery/UPnP/mDNS, system daemons"]
+        KERN["Kernel & Drivers\nLinux 4.19\nBroadcom platform/WL drivers, boot chain"]
+    end
+
+    ADMIN -->|"HTTPS/HTTP admin requests/responses"| WEB
+    WEB -->|"NVRAM reads/writes and rc service actions"| CTRL
+    CTRL -->|"Service start/stop/restart and config apply"| NET
+    CTRL -->|"Wireless service orchestration and config apply"| WLAN
+    CTRL -->|"USB/system service orchestration and config apply"| SYS
+    NET -->|"Netfilter, sockets, routing, interface control"| KERN
+    WLAN -->|"WL ioctl/IOVAR and driver events"| KERN
+    SYS -->|"Block/device/filesystem and daemon runtime support"| KERN
+    NET <-->|"WAN protocols, VPN tunnels, DNS/NTP/DDNS traffic"| EXT
+    WEB <-->|"Firmware update checks and web API integrations"| EXT
+    SYS <-->|"USB devices, storage media, mobile peripherals"| EXT

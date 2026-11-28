@@ -1,0 +1,68 @@
+flowchart TB
+    classDef proprietary fill:#fff5f5,stroke:#c92a2a,stroke-width:2px,color:#111;
+    classDef external fill:#f8f9fa,stroke:#495057,color:#111;
+
+    RC["rc\nNetwork service orchestrator"]
+    NVRAM["NVRAM config bus\nwan*/lan*/dhcp*/dns*/ipv6*/upnp*/qos*"]
+    KERN["Kernel netfilter/netlink"]:::external
+
+    subgraph DNSDHCP["DNS / DHCP / IPv6"]
+        DNSM["dnsmasq\nDNS forwarder/cache, DHCPv4/v6, RA"]
+        D6["odhcp6c\nDHCPv6 client/PD"]
+        R6["6relayd\nIPv6 relay/ND proxy"]
+        DFW["dhcpfwd\nDHCP relay/helper"]
+    end
+
+    subgraph WANPPP["WAN / PPP / Tunnels"]
+        PPP["pppd\nPPP engine"]
+        PPOE["rp-pppoe\nPPPoE plugin/relay"]
+        XL2["xl2tpd / rp-l2tp\nL2TP daemons"]
+        PPTP["pptpd / accel-pptpd / pptp-client\nPPTP server/client"]
+    end
+
+    subgraph ROUTEFW["Routing / Firewall / QoS"]
+        IPT["iptables/ip6tables/ipset/ebtables\nFirewall, NAT, mangle, sets"]
+        IPROUTE["iproute2/tc/bridge/vlan/ifenslave\nRouting, QoS, interfaces"]
+        QOS["qosmgmtd/rstats\nQoS orchestration and stats"]
+        IGMP["igmpproxy/udpxy\nMulticast proxy / UDP-HTTP"]
+    end
+
+    subgraph DISC["Discovery / Diagnostics"]
+        UPNP["miniupnpd(-igdv2)\nUPnP IGD/NAT-PMP/PCP"]
+        LLDP["lldpd\nLLDP discovery/MAP"]
+        MDNS["avahi/mDNSResponder\nmDNS/DNS-SD"]
+        DIAG["tcpdump/traceroute/ethtool/dns_ping\nnetstat-nat/conntrack\nDiagnostics/tools"]
+    end
+
+    RC -->|"start/stop/restart, notify_rc, pid/signal"| DNSM
+    RC -->|"start/stop WAN IPv6 client"| D6
+    RC -->|"start/stop IPv6 relay/service"| R6
+    RC -->|"spawn/kill DHCP relay"| DFW
+    RC -->|"start/stop PPP sessions"| PPP
+    RC -->|"configure/start tunnel daemons"| XL2
+    RC -->|"configure/start PPTP services"| PPTP
+    RC -->|"generate/apply rules, iptables-restore"| IPT
+    RC -->|"ip/tc/bridge commands"| IPROUTE
+    RC -->|"start/stop/restart QoS services"| QOS
+    RC -->|"start/stop multicast proxy"| IGMP
+    RC -->|"start/stop/reload UPnP"| UPNP
+    RC -->|"start/configure LLDP"| LLDP
+    RC -->|"start/stop mDNS"| MDNS
+
+    DNSM <-->|"reads dhcp/dns/lan/ipv6 keys"| NVRAM
+    D6 <-->|"reads wan*_ipv6*/ipv6_* keys"| NVRAM
+    R6 <-->|"reads ipv6_service/lan_ifname/SDN keys"| NVRAM
+    PPP <-->|"reads wan%d_* PPP/auth/MTU keys"| NVRAM
+    IPT <-->|"reads fw_*/vts_*/upnp_*/wan*/lan* keys"| NVRAM
+    UPNP <-->|"reads upnp_*/ports/vts keys"| NVRAM
+    QOS <-->|"reads qos_*/bandwidth/rule keys"| NVRAM
+
+    PPOE -->|"pppd plugin / PPPoE session"| PPP
+    PPTP -->|"pppd control/scripts"| PPP
+    XL2 -->|"pppd control/scripts"| PPP
+    D6 -->|"DHCPv6 lease/script updates"| RC
+    DNSM -->|"resolv.conf/hosts/dhcp leases in /tmp,/etc"| RC
+    IGMP -->|"spawns/manages udpxy process"| RC
+    IPT -->|"netfilter rules for NAT/forward/filter"| KERN
+    IPROUTE -->|"netlink route/qdisc/link/addr"| KERN
+    DIAG -->|"procfs/netlink/ioctl packet capture"| KERN
