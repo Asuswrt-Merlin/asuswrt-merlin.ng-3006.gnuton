@@ -6137,15 +6137,15 @@ static int ej_update_variables(int eid, webs_t wp, int argc, char_t **argv)
 #if defined(GTBE98)
 		const char *vlan_error = gtbe98_http_preflight(NULL);
 		if (vlan_error) {
-			/* Messages are fixed server strings, never request values. */
-			websWrite(wp, "<script>parent.alert('%s');parent.location.reload();</script>\n", vlan_error);
+			logmessage("WAN VLAN", "%s", vlan_error);
+			do_ej("wan_vlan_apply_error.htm", wp);
 			return 0;
 		}
 #endif
 		has_modify = validate_apply(wp, NULL);
 #if defined(GTBE98)
 		if (has_modify < 0) {
-			websWrite(wp, "<script>parent.alert('WAN VLAN validation failed; reload and retry.');parent.location.reload();</script>\n");
+			do_ej("wan_vlan_apply_error.htm", wp);
 			return 0;
 		}
 #endif

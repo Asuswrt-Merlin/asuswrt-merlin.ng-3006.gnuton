@@ -704,7 +704,7 @@ function form_show(v, change_primary_wan){
 
 function applyRule(){
 	if (based_modelid == "GT-BE98" && '<% nvram_get("wan0_dot1q"); %>' == "1" && wans_flag == 1) {
-		alert("Disable explicit WAN VLAN in WAN > Internet Connection before enabling Dual WAN or USB standby.");
+		alert("<#WANVLAN_port_locked#>");
 		return false;
 	}
 
@@ -1252,7 +1252,7 @@ function applyRule(){
 	if (based_modelid == "GT-BE98" && '<% nvram_get("wan0_dot1q"); %>' == "1") {
 		var autoWan = $("input[name='autowan_enable']").val();
 		if (document.form.wans_dualwan.value != "wan none" || autoWan == "1" || document.form.wans_standby.value == "1") {
-			alert("Explicit WAN VLAN requires one manually selected WAN without USB standby. Disable WAN VLAN before changing this mode.");
+			alert("<#WANVLAN_port_locked#>");
 			return false;
 		}
 		document.form.action_script.value = "reboot";

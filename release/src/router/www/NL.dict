@@ -4496,6 +4496,15 @@ wandog_enable2=Ping naar internet inschakelen
 WANTCPMSSOptionText=TCP MSS-optie
 WANTCPMSSOptionComm1Text=bytes
 WANVLANIDText=VLAN-ID
+WANVLAN_priority=802.1p-prioriteit
+WANVLAN_unavailable=WAN-VLAN is momenteel niet beschikbaar. Als het is ingeschakeld, selecteert u «Nee» en klikt u op «Toepassen» om het uit te schakelen en de router opnieuw te starten.
+WANVLAN_invalid_range=Voer een VLAN-ID van 3 tot 4093 en een prioriteit van 0 tot 7 in.
+WANVLAN_migrate_iptv=Schakel eerst het providerprofiel en de STB-poort uit onder LAN > IPTV. Het VLAN van de provider wordt niet automatisch overgenomen. Voer het hier in.
+WANVLAN_topology=WAN-VLAN vereist één handmatig geselecteerde WAN-verbinding. Schakel eerst AutoWAN, Dual WAN, USB-back-up en -stand-by, WAN-aggregatie en LAN-VLAN's uit.
+WANVLAN_iptv_locked=Schakel 802.1Q uit onder WAN > Internetverbinding en start de router opnieuw op voordat u de IPTV-instellingen wijzigt.
+WANVLAN_port_locked=WAN-VLAN vereist één handmatig geselecteerde WAN-verbinding zonder USB-stand-by. Schakel 802.1Q uit onder WAN > Internetverbinding voordat u de modus wijzigt.
+WANVLAN_help=Configureer één internet-VLAN op de handmatig geselecteerde 10G WAN- of 2,5G LAN/WAN-poort. Schakel eerst IPTV, AutoWAN, Dual WAN, USB-back-up en -stand-by, WAN-aggregatie en LAN-VLAN's uit. De ErP-stand-bymodus wordt opgeschort zolang WAN-VLAN is ingeschakeld. Als u een handmatig IPTV-profiel wilt vervangen, schakelt u dit eerst uit en voert u hier het VLAN van de provider in. Een wijziging van het VLAN of de poort vereist een herstart. Schakel WAN-VLAN uit en start de router opnieuw op voordat u het IPTV-profiel herstelt.
+WANVLAN_apply_failed=De instellingen konden niet worden toegepast omdat de controle van WAN-VLAN is mislukt. De pagina wordt opnieuw geladen. Controleer de instellingen en probeer het opnieuw.
 WANAggregation=WAN aggregation
 WANAggregation_desc=WAN-aggregatie combineert twee netwerkverbindingen om uw WAN-snelheid te verhogen tot 2Gbps. Sluit de #WAN-poort en de LAN 4-poort van uw router aan om de LAN-poorten van uw modem (zorg dat u twee kabels met dezelfde specificatie gebruikt). <a id="wanAgg_faq" target="_blank" style="color:#FFCC00;text-decoration:underline;">FAQ WAN-aggregatie</a>
 WANAggregation_enable=WAN-aggregatie inschakelen

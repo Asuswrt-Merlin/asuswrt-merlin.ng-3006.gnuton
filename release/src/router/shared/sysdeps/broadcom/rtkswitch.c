@@ -316,7 +316,7 @@ unsigned int rtkswitch_lanPorts_phyStatus(void)
 	return value;
 }
 
-int rtkswitch_LanPort_linkUp(void)
+static int rtkswitch_lan_power(int up)
 {
 #if defined(GTBE98)
 	/* WAN/LAN1 is released only after the explicit WAN readback succeeds.
@@ -331,23 +331,26 @@ int rtkswitch_LanPort_linkUp(void)
 		char port_id[2];
 		for (port = 1; port <= 3; ++port) {
 			snprintf(port_id, sizeof(port_id), "%d", port);
-			ret = eval("rtkswitch", "12", port_id);
+			ret = eval("rtkswitch", up ? "12" : "13", port_id);
 			if (ret)
 				return ret;
 		}
 		return 0;
 	}
 #endif
-	eval("rtkswitch", "5");
+	eval("rtkswitch", up ? "5" : "6");
 
 	return 0;
 }
 
+int rtkswitch_LanPort_linkUp(void)
+{
+	return rtkswitch_lan_power(1);
+}
+
 int rtkswitch_LanPort_linkDown(void)
 {
-	eval("rtkswitch", "6");
-
-	return 0;
+	return rtkswitch_lan_power(0);
 }
 
 #if defined(GTBE98) || defined(GTBE98_PRO) || defined(GTBE96) || defined(GTBE19000) || defined(RTBE92U) || defined(RTBE95U) || defined(RTBE82U) || defined(TUFBE82) || defined(RTBE58U_PRO) || defined(GTBE19000AI) || defined(GTBE96_AI)

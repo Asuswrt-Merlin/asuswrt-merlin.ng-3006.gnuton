@@ -4496,6 +4496,15 @@ wandog_enable2=Enable Ping to Internet
 WANTCPMSSOptionText=ตัวเลือก TCP MSS
 WANTCPMSSOptionComm1Text=ไบต์
 WANVLANIDText=VLAN ID
+WANVLAN_priority=ลำดับความสำคัญ 802.1p
+WANVLAN_unavailable=ขณะนี้ไม่สามารถใช้ WAN VLAN ได้ หากเปิดใช้งานอยู่ ให้เลือก «ไม่» แล้วคลิก «นำไปใช้» เพื่อปิดใช้งานและรีสตาร์ทเราเตอร์
+WANVLAN_invalid_range=ป้อน VLAN ID ตั้งแต่ 3 ถึง 4093 และลำดับความสำคัญตั้งแต่ 0 ถึง 7
+WANVLAN_migrate_iptv=ปิดโปรไฟล์ผู้ให้บริการและพอร์ต STB ใน LAN > IPTV ก่อน ระบบจะไม่ย้าย VLAN ของผู้ให้บริการโดยอัตโนมัติ ให้ป้อนที่นี่
+WANVLAN_topology=WAN VLAN ต้องใช้ WAN เพียงหนึ่งรายการที่เลือกด้วยตนเอง ให้ปิด AutoWAN, WAN คู่, การสำรองและสแตนด์บายผ่าน USB, การรวม WAN และ LAN VLAN ก่อน
+WANVLAN_iptv_locked=ปิด 802.1Q ใน WAN > การเชื่อมต่ออินเทอร์เน็ต และรีสตาร์ทเราเตอร์ก่อนเปลี่ยนการตั้งค่า IPTV
+WANVLAN_port_locked=WAN VLAN ต้องใช้ WAN เพียงหนึ่งรายการที่เลือกด้วยตนเองโดยไม่ใช้สแตนด์บาย USB ให้ปิด 802.1Q ใน WAN > การเชื่อมต่ออินเทอร์เน็ต ก่อนเปลี่ยนโหมด
+WANVLAN_help=กำหนด VLAN อินเทอร์เน็ตหนึ่งรายการบนพอร์ต 10G WAN หรือ 2.5G LAN/WAN ที่เลือกด้วยตนเอง ให้ปิด IPTV, AutoWAN, WAN คู่, การสำรองและสแตนด์บายผ่าน USB, การรวม WAN และ LAN VLAN ก่อน โหมดสแตนด์บาย ErP จะหยุดชั่วคราวขณะเปิดใช้งาน WAN VLAN หากต้องการแทนที่โปรไฟล์ IPTV แบบกำหนดเอง ให้ปิดโปรไฟล์นั้นก่อนแล้วป้อน VLAN ของผู้ให้บริการที่นี่ การเปลี่ยน VLAN หรือพอร์ตต้องรีสตาร์ทเราเตอร์ หากต้องการคืนค่าโปรไฟล์ IPTV ให้ปิด WAN VLAN และรีสตาร์ทเราเตอร์ก่อน
+WANVLAN_apply_failed=ไม่สามารถใช้การตั้งค่าได้เนื่องจากการตรวจสอบ WAN VLAN ล้มเหลว หน้าจะโหลดใหม่ โปรดตรวจสอบการตั้งค่าแล้วลองอีกครั้ง
 WANAggregation=WAN Aggregation
 WANAggregation_desc=การรวมเครือข่าย WAN รวมการเชื่อมต่อสองเครือข่ายเพื่อเพิ่มความเร็ว WAN สูงสุดถึง 2Gbps เชื่อมต่อพอร์ต #WAN ของเราเตอร์และพอร์ต LAN 4 กับพอร์ต LAN ของโมเด็ม (ตรวจสอบให้แน่ใจว่าคุณใช้สายเคเบิลสองเส้นที่มีข้อมูลจำเพาะเดียวกัน) <a id="wanAgg_faq" target="_blank" style="color:#FFCC00;text-decoration:underline;">คำถามที่พบบ่อยคำถามที่พบบ่อยเกี่ยวกับการรวมเครือข่าย WAN</a>
 WANAggregation_enable=เปิดใช้งานการรวม WAN

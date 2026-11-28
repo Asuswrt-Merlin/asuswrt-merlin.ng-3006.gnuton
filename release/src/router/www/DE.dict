@@ -4496,6 +4496,15 @@ wandog_enable2=Enable Ping to Internet
 WANTCPMSSOptionText=TCP-MSS-Option
 WANTCPMSSOptionComm1Text=Bytes
 WANVLANIDText=VLAN-ID
+WANVLAN_priority=802.1p-Priorität
+WANVLAN_unavailable=Das WAN-VLAN ist derzeit nicht verfügbar. Falls es aktiviert ist, wählen Sie «Nein» und klicken Sie auf «Anwenden», um es zu deaktivieren und den Router neu zu starten.
+WANVLAN_invalid_range=Geben Sie eine VLAN-ID von 3 bis 4093 und eine Priorität von 0 bis 7 ein.
+WANVLAN_migrate_iptv=Deaktivieren Sie zuerst unter LAN > IPTV das Anbieterprofil und den STB-Port. Das VLAN des Anbieters wird nicht automatisch übernommen. Geben Sie es hier ein.
+WANVLAN_topology=Das WAN-VLAN erfordert eine manuell ausgewählte WAN-Verbindung. Deaktivieren Sie zuerst AutoWAN, Dual-WAN, USB-Backup und -Standby, WAN-Aggregation und LAN-VLANs.
+WANVLAN_iptv_locked=Deaktivieren Sie unter WAN > Internetverbindung die Option 802.1Q und starten Sie den Router neu, bevor Sie die IPTV-Einstellungen ändern.
+WANVLAN_port_locked=Das WAN-VLAN erfordert eine manuell ausgewählte WAN-Verbindung ohne USB-Standby. Deaktivieren Sie 802.1Q unter WAN > Internetverbindung, bevor Sie den Modus ändern.
+WANVLAN_help=Richten Sie ein einziges Internet-VLAN am manuell ausgewählten 10G-WAN- oder 2,5G-LAN/WAN-Port ein. Deaktivieren Sie zuerst IPTV, AutoWAN, Dual-WAN, USB-Backup und -Standby, WAN-Aggregation und LAN-VLANs. Bei aktivem WAN-VLAN ist der ErP-Standby ausgesetzt. Um ein manuelles IPTV-Profil zu ersetzen, deaktivieren Sie es zuerst und geben Sie hier das VLAN des Anbieters ein. Änderungen am VLAN oder Port erfordern einen Neustart. Deaktivieren Sie das WAN-VLAN und starten Sie den Router neu, bevor Sie das IPTV-Profil wiederherstellen.
+WANVLAN_apply_failed=Die Einstellungen konnten nicht übernommen werden, weil die Prüfung des WAN-VLANs fehlgeschlagen ist. Die Seite wird neu geladen. Prüfen Sie die Einstellungen und versuchen Sie es erneut.
 WANAggregation=WAN-Aggregation
 WANAggregation_desc=Bei der WAN-Aggregation werden zwei Netzwerkverbindungen kombiniert, um die WAN-Geschwindigkeit auf bis zu 2 Gbps zu erweitern. Verbinden sie den #WAN-Anschluss des Routers mit dem LAN-Anschluss 4 des Modems. (Stellen Sie dabei sicher, dass beide Kabel über die gleiche Spezifikation verfügen.) <a id="wanAgg_faq" target="_blank" style="color:#FFCC00;text-decoration:underline;">WAN-Aggregation – FAQ</a>
 WANAggregation_enable=WAN-Aggregation aktivieren

@@ -4496,6 +4496,15 @@ wandog_enable2=Enable Ping to Internet
 WANTCPMSSOptionText=Pilihan TCP MSS
 WANTCPMSSOptionComm1Text=bait
 WANVLANIDText=VLAN ID
+WANVLAN_priority=Keutamaan 802.1p
+WANVLAN_unavailable=VLAN WAN tidak tersedia buat masa ini. Jika didayakan, pilih «Tidak» dan klik «Guna» untuk menyahdayakannya dan but semula penghala.
+WANVLAN_invalid_range=Masukkan ID VLAN antara 3 hingga 4093 dan keutamaan antara 0 hingga 7.
+WANVLAN_migrate_iptv=Nyahdayakan profil ISP dan port STB dalam LAN > IPTV dahulu. VLAN ISP tidak dipindahkan secara automatik. Masukkan VLAN itu di sini.
+WANVLAN_topology=VLAN WAN memerlukan satu WAN yang dipilih secara manual. Nyahdayakan AutoWAN, Dwi WAN, sandaran dan siap sedia USB, pengagregatan WAN serta VLAN LAN dahulu.
+WANVLAN_iptv_locked=Nyahdayakan 802.1Q dalam WAN > Sambungan Internet dan but semula penghala sebelum menukar tetapan IPTV.
+WANVLAN_port_locked=VLAN WAN memerlukan satu WAN yang dipilih secara manual tanpa siap sedia USB. Nyahdayakan 802.1Q dalam WAN > Sambungan Internet sebelum menukar mod.
+WANVLAN_help=Konfigurasikan satu VLAN Internet pada port WAN 10G atau LAN/WAN 2.5G yang dipilih secara manual. Nyahdayakan IPTV, AutoWAN, Dwi WAN, sandaran dan siap sedia USB, pengagregatan WAN serta VLAN LAN dahulu. Mod siap sedia ErP digantung semasa VLAN WAN didayakan. Untuk menggantikan profil IPTV manual, nyahdayakannya dahulu dan masukkan VLAN ISP di sini. Perubahan pada VLAN atau port memerlukan but semula. Untuk memulihkan profil IPTV, nyahdayakan VLAN WAN dan but semula penghala dahulu.
+WANVLAN_apply_failed=Tetapan tidak dapat digunakan kerana pengesahan VLAN WAN gagal. Halaman akan dimuat semula. Semak tetapan dan cuba lagi.
 WANAggregation=WAN aggregation
 WANAggregation_desc=Pengagregatan WAN menggabungkan dua sambungan rangkaian untuk meningkatkan kelajuan WAN anda sehingga 2Gbps. Sambungkan port #WAN penghala anda dan port LAN 4 ke port LAN modem anda (pastikan anda menggunakan dua kabel yang mempunyai spesifikasi sama). <a id="wanAgg_faq" target="_blank" style="color:#FFCC00;text-decoration:underline;">Soalan Lazim Pengagregatan WAN</a>
 WANAggregation_enable=Dayakan Pengagregatan WAN

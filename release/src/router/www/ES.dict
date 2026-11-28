@@ -4496,6 +4496,15 @@ wandog_enable2=Enable Ping to Internet
 WANTCPMSSOptionText=Opción MSS TCP
 WANTCPMSSOptionComm1Text=bytes
 WANVLANIDText=Identificador de VLAN
+WANVLAN_priority=Prioridad 802.1p
+WANVLAN_unavailable=La VLAN WAN no está disponible. Si está habilitada, selecciona «No» y pulsa «Aplicar» para deshabilitarla y reiniciar el router.
+WANVLAN_invalid_range=Introduce un ID de VLAN entre 3 y 4093 y una prioridad entre 0 y 7.
+WANVLAN_migrate_iptv=Deshabilita primero el perfil del proveedor de Internet y el puerto STB en LAN > IPTV. La VLAN del proveedor no se migra automáticamente. Introdúcela aquí.
+WANVLAN_topology=La VLAN WAN requiere una única WAN seleccionada manualmente. Deshabilita primero AutoWAN, WAN dual, respaldo y espera USB, agregación WAN y VLAN de la LAN.
+WANVLAN_iptv_locked=Deshabilita 802.1Q en WAN > Conexión a Internet y reinicia el router antes de cambiar la configuración de IPTV.
+WANVLAN_port_locked=La VLAN WAN requiere una única WAN seleccionada manualmente sin espera USB. Deshabilita 802.1Q en WAN > Conexión a Internet antes de cambiar de modo.
+WANVLAN_help=Configura una única VLAN de Internet en el puerto WAN de 10 Gbps o LAN/WAN de 2,5 Gbps seleccionado manualmente. Deshabilita primero IPTV, AutoWAN, WAN dual, respaldo y espera USB, agregación WAN y VLAN de la LAN. El modo de espera ErP se suspende mientras la VLAN WAN esté habilitada. Para reemplazar un perfil IPTV manual, deshabilítalo primero e introduce aquí la VLAN del proveedor. Los cambios de VLAN o puerto requieren reiniciar el router. Para restaurar el perfil IPTV, deshabilita primero la VLAN WAN y reinicia el router.
+WANVLAN_apply_failed=No se pudo aplicar la configuración porque falló la validación de la VLAN WAN. La página se volverá a cargar. Revisa la configuración e inténtalo de nuevo.
 WANAggregation=agregación de WAN
 WANAggregation_desc=La agregación WAN combina dos conexiones de red para aumentar la velocidad WAN hasta 2 Gbps. Conecte el puerto LAN 4 y el puerto #WAN del router a los puertos LAN del módem (asegúrese de utilizar dos cables con la misma especificación). <a id="wanAgg_faq" target="_blank" style="color:#FFCC00;text-decoration:underline;">Preguntas más frecuentes sobre la agregación WAN</a>
 WANAggregation_enable=Habilitar agregación WAN

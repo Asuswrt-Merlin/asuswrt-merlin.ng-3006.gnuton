@@ -4496,6 +4496,15 @@ wandog_enable2=Enable Ping to Internet
 WANTCPMSSOptionText=TCP MSS Seçeneği
 WANTCPMSSOptionComm1Text=byte
 WANVLANIDText=VLAN ID
+WANVLAN_priority=802.1p önceliği
+WANVLAN_unavailable=WAN VLAN şu anda kullanılamıyor. Etkinse devre dışı bırakmak ve yönlendiriciyi yeniden başlatmak için «Hayır» seçeneğini belirleyip «Uygula» düğmesine tıklayın.
+WANVLAN_invalid_range=3 ile 4093 arasında bir VLAN kimliği ve 0 ile 7 arasında bir öncelik girin.
+WANVLAN_migrate_iptv=Önce LAN > IPTV bölümünde sağlayıcı profilini ve STB bağlantı noktasını devre dışı bırakın. Sağlayıcının VLAN bilgisi otomatik olarak aktarılmaz. Buraya girin.
+WANVLAN_topology=WAN VLAN, elle seçilen tek bir WAN bağlantısı gerektirir. Önce AutoWAN, Çift WAN, USB yedekleme ve bekleme, WAN birleştirme ve LAN VLAN'larını devre dışı bırakın.
+WANVLAN_iptv_locked=IPTV ayarlarını değiştirmeden önce WAN > Internet Bağlantısı bölümünde 802.1Q seçeneğini devre dışı bırakın ve yönlendiriciyi yeniden başlatın.
+WANVLAN_port_locked=WAN VLAN, USB bekleme olmadan elle seçilen tek bir WAN bağlantısı gerektirir. Modu değiştirmeden önce WAN > Internet Bağlantısı bölümünde 802.1Q seçeneğini devre dışı bırakın.
+WANVLAN_help=Elle seçilen 10G WAN veya 2,5G LAN/WAN bağlantı noktasında tek bir İnternet VLAN'ı yapılandırın. Önce IPTV, AutoWAN, Çift WAN, USB yedekleme ve bekleme, WAN birleştirme ve LAN VLAN'larını devre dışı bırakın. WAN VLAN etkinken ErP bekleme modu askıya alınır. Elle ayarlanmış bir IPTV profilini değiştirmek için önce profili devre dışı bırakın ve sağlayıcının VLAN bilgisini buraya girin. VLAN veya bağlantı noktası değişiklikleri yeniden başlatma gerektirir. IPTV profilini geri yüklemeden önce WAN VLAN'ı devre dışı bırakın ve yönlendiriciyi yeniden başlatın.
+WANVLAN_apply_failed=WAN VLAN doğrulaması başarısız olduğu için ayarlar uygulanamadı. Sayfa yeniden yüklenecek. Ayarları kontrol edip tekrar deneyin.
 WANAggregation=WAN birleştirme
 WANAggregation_desc=WAN Toplama, WAN hızınızı 2 Gbps'ye kadar artırmak için iki ağ bağlantısını birleştirir. Yönlendiricinizin #WAN bağlantı noktasını ve LAN 4 bağlantı noktasını modeminizin LAN bağlantı noktasına bağlayın (aynı özelliklerde iki kablo kullandığınızdan emin olun). <a id="wanAgg_faq" target="_blank" style="color:#FFCC00;text-decoration:underline;">WAN Toplama SSS</a>
 WANAggregation_enable=WAN Toplamasını Etkinleştir

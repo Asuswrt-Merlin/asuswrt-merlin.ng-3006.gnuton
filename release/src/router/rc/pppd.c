@@ -70,7 +70,7 @@ char *ppp_safe_escape(char *src, char *buf, size_t size)
 }
 
 int
-start_pppd(int unit)
+start_pppd(int unit, const char *link_ifname)
 {
 	FILE *fp;
 	char options[80];
@@ -133,7 +133,7 @@ start_pppd(int unit)
 			nvram_safe_get(strcat_r(prefix, "heartbeat_x", tmp)) :
 			nvram_safe_get(strcat_r(prefix, "gateway_x", tmp)));
 		fprintf(fp, "pptp_ifname %s\n",
-			nvram_safe_get(strcat_r(prefix, "ifname", tmp)));
+			link_ifname);
 		/* see KB Q189595 -- historyless & mtu */
 		fprintf(fp, "nomppe-stateful mtu 1400\n");
 		if (nvram_match(strcat_r(prefix, "pptp_options_x", tmp), "-mppc")) {
@@ -172,7 +172,7 @@ start_pppd(int unit)
 #endif
 	if (nvram_match(strcat_r(prefix, "proto", tmp), "pppoe")) {
 		fprintf(fp, "plugin rp-pppoe.so nic-%s\n",
-			nvram_safe_get(strcat_r(prefix, "ifname", tmp)));
+			link_ifname);
 
 		if (nvram_invmatch(strcat_r(prefix, "pppoe_service", tmp), "")) {
 			fprintf(fp, "rp_pppoe_service '%s'\n",
@@ -371,7 +371,7 @@ start_pppd(int unit)
 			nvram_invmatch(strcat_r(prefix, "heartbeat_x", tmp), "") ?
 				nvram_safe_get(strcat_r(prefix, "heartbeat_x", tmp)) :
 				nvram_safe_get(strcat_r(prefix, "gateway_x", tmp)),
-			nvram_safe_get(strcat_r(prefix, "ifname", tmp)),
+			link_ifname,
 			nvram_invmatch(strcat_r(prefix, "hostname", tmp), "") ?
 				nvram_safe_get(strcat_r(prefix, "hostname", tmp)) : "localhost",
 			nvram_get_int(strcat_r(prefix, "pppoe_maxfail", tmp))  ? : 32767,

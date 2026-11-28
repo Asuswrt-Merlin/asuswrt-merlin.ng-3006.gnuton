@@ -4496,6 +4496,15 @@ wandog_enable2=Enable Ping to Internet
 WANTCPMSSOptionText=Opțiune TCP MSS
 WANTCPMSSOptionComm1Text=octeţi
 WANVLANIDText=VLAN ID
+WANVLAN_priority=Prioritate 802.1p
+WANVLAN_unavailable=VLAN-ul WAN nu este disponibil momentan. Dacă este activat, selectați «Nu» și faceți clic pe «Aplicare» pentru a-l dezactiva și a reporni ruterul.
+WANVLAN_invalid_range=Introduceți un ID VLAN între 3 și 4093 și o prioritate între 0 și 7.
+WANVLAN_migrate_iptv=Dezactivați întâi profilul furnizorului și portul STB în LAN > IPTV. VLAN-ul furnizorului nu este migrat automat. Introduceți-l aici.
+WANVLAN_topology=VLAN-ul WAN necesită o singură conexiune WAN selectată manual. Dezactivați întâi AutoWAN, WAN dual, conexiunea de rezervă și modul standby prin USB, agregarea WAN și VLAN-urile LAN.
+WANVLAN_iptv_locked=Dezactivați 802.1Q în WAN > Conexiune la Internet și reporniți ruterul înainte de a modifica setările IPTV.
+WANVLAN_port_locked=VLAN-ul WAN necesită o singură conexiune WAN selectată manual, fără standby USB. Dezactivați 802.1Q în WAN > Conexiune la Internet înainte de a schimba modul.
+WANVLAN_help=Configurați un singur VLAN de internet pe portul WAN 10G sau LAN/WAN 2,5G selectat manual. Dezactivați întâi IPTV, AutoWAN, WAN dual, conexiunea de rezervă și modul standby prin USB, agregarea WAN și VLAN-urile LAN. Modul standby ErP este suspendat cât timp VLAN-ul WAN este activ. Pentru a înlocui un profil IPTV manual, dezactivați-l întâi și introduceți aici VLAN-ul furnizorului. Modificarea VLAN-ului sau a portului necesită repornire. Pentru a restabili profilul IPTV, dezactivați întâi VLAN-ul WAN și reporniți ruterul.
+WANVLAN_apply_failed=Setările nu au putut fi aplicate deoarece validarea VLAN-ului WAN a eșuat. Pagina va fi reîncărcată. Verificați setările și încercați din nou.
 WANAggregation=Agregare WAN
 WANAggregation_desc=Funcţia de agregare WAN combină două conexiuni de reţea pentru a creşte viteza WAN până la 2 Gbps. Conectaţi portul #WAN şi portul LAN 4 ale routerului la porturile LAN ale modemului (asiguraţi-vă că utilizaţi două cabluri cu aceeaşi specificaţie). <a id="wanAgg_faq" target="_blank" style="color:#FFCC00;text-decoration:underline;">Întrebări frecvente despre agregarea WAN</a>
 WANAggregation_enable=Activare agregare WAN

@@ -4496,6 +4496,15 @@ wandog_enable2=Omogoči preverjanje dosegljivosti interneta
 WANTCPMSSOptionText=Možnost MSS za TCP
 WANTCPMSSOptionComm1Text=bajtov
 WANVLANIDText=ID omrežja VLAN
+WANVLAN_priority=Prioriteta 802.1p
+WANVLAN_unavailable=VLAN WAN trenutno ni na voljo. Če je omogočen, izberite «Ne» in kliknite «Uporabi», da ga onemogočite in znova zaženete usmerjevalnik.
+WANVLAN_invalid_range=Vnesite ID VLAN od 3 do 4093 in prioriteto od 0 do 7.
+WANVLAN_migrate_iptv=Najprej onemogočite profil ponudnika in vrata STB v meniju LAN > IPTV. VLAN ponudnika se ne prenese samodejno. Vnesite ga tukaj.
+WANVLAN_topology=VLAN WAN zahteva eno ročno izbrano povezavo WAN. Najprej onemogočite AutoWAN, dvojni WAN, rezervno povezavo in pripravljenost prek USB, združevanje WAN in omrežja VLAN v LAN.
+WANVLAN_iptv_locked=Pred spreminjanjem nastavitev IPTV onemogočite 802.1Q v meniju WAN > Internetna povezava in znova zaženite usmerjevalnik.
+WANVLAN_port_locked=VLAN WAN zahteva eno ročno izbrano povezavo WAN brez pripravljenosti prek USB. Pred spremembo načina onemogočite 802.1Q v meniju WAN > Internetna povezava.
+WANVLAN_help=Nastavite en internetni VLAN na ročno izbranih vratih 10G WAN ali 2,5G LAN/WAN. Najprej onemogočite IPTV, AutoWAN, dvojni WAN, rezervno povezavo in pripravljenost prek USB, združevanje WAN in omrežja VLAN v LAN. Pripravljenost ErP je začasno izklopljena, dokler je VLAN WAN omogočen. Če želite zamenjati ročni profil IPTV, ga najprej onemogočite in tukaj vnesite VLAN ponudnika. Sprememba VLAN-a ali vrat zahteva ponovni zagon. Pred obnovitvijo profila IPTV onemogočite VLAN WAN in znova zaženite usmerjevalnik.
+WANVLAN_apply_failed=Nastavitev ni bilo mogoče uporabiti, ker preverjanje VLAN-a WAN ni uspelo. Stran se bo znova naložila. Preverite nastavitve in poskusite znova.
 WANAggregation=Združevanje omrežij WAN
 WANAggregation_desc=Združevanje omrežij WAN združi dve omrežni povezavi, da poveča hitrost omrežja WAN na 2 Gb/s. Priključek #WAN in priključek LAN 4 na usmerjevalniku priključite na priključka LAN na modemu (obvezno uporabite kabla z enakimi specifikacijami). <a id="wanAgg_faq" target="_blank" style="color:#FFCC00;text-decoration:underline;">Pogosta vprašanja o združevanju omrežij WAN</a>
 WANAggregation_enable=Omogoči združevanje WAN

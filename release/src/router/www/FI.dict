@@ -4496,6 +4496,15 @@ wandog_enable2=Enable Ping to Internet
 WANTCPMSSOptionText=TCP MSS -valinta
 WANTCPMSSOptionComm1Text=tavua
 WANVLANIDText=VLAN-tunnus
+WANVLAN_priority=802.1p-prioriteetti
+WANVLAN_unavailable=WAN-VLAN ei ole tällä hetkellä käytettävissä. Jos se on käytössä, valitse «Ei» ja napsauta «Käytä», niin toiminto poistetaan käytöstä ja reititin käynnistyy uudelleen.
+WANVLAN_invalid_range=Anna VLAN-tunnus väliltä 3–4093 ja prioriteetti väliltä 0–7.
+WANVLAN_migrate_iptv=Poista ensin käytöstä palveluntarjoajan profiili ja STB-portti kohdassa LAN > IPTV. Palveluntarjoajan VLANia ei siirretä automaattisesti. Anna se tässä.
+WANVLAN_topology=WAN-VLAN edellyttää yhtä manuaalisesti valittua WAN-yhteyttä. Poista ensin käytöstä AutoWAN, kaksois-WAN, USB-varayhteys ja valmiustila, WAN-yhdistäminen ja LAN-verkon VLANit.
+WANVLAN_iptv_locked=Poista 802.1Q käytöstä kohdassa WAN > Internet-yhteys ja käynnistä reititin uudelleen ennen IPTV-asetusten muuttamista.
+WANVLAN_port_locked=WAN-VLAN edellyttää yhtä manuaalisesti valittua WAN-yhteyttä ilman USB-valmiustilaa. Poista 802.1Q käytöstä kohdassa WAN > Internet-yhteys ennen tilan vaihtamista.
+WANVLAN_help=Määritä yksi Internet-VLAN manuaalisesti valittuun 10G WAN- tai 2,5G LAN/WAN -porttiin. Poista ensin käytöstä IPTV, AutoWAN, kaksois-WAN, USB-varayhteys ja valmiustila, WAN-yhdistäminen ja LAN-verkon VLANit. ErP-valmiustila on keskeytetty WAN-VLANin ollessa käytössä. Jos korvaat manuaalisen IPTV-profiilin, poista se ensin käytöstä ja anna palveluntarjoajan VLAN tässä. VLANin tai portin vaihtaminen vaatii uudelleenkäynnistyksen. Poista WAN-VLAN käytöstä ja käynnistä reititin uudelleen ennen IPTV-profiilin palauttamista.
+WANVLAN_apply_failed=Asetuksia ei voitu ottaa käyttöön, koska WAN-VLANin tarkistus epäonnistui. Sivu ladataan uudelleen. Tarkista asetukset ja yritä uudelleen.
 WANAggregation=WAN-yhteyksien yhdistäminen
 WANAggregation_desc=WAN-aggregaatio yhdistää kaksi verkkoyhteyttä, jolloin WANin nopeus nousee jopa 2 Gbps:ään. Yhdistä reitittimen #WAN-portti ja LAN 4-portti modeemin LAN-portteihin (varmista, että käytät kahta kaapelia, joiden tekniset ominaisuudet ovat samat). <a id="wanAgg_faq" target="_blank" style="color:#FFCC00;text-decoration:underline;">WAN-aggregaatio Usein kysytyt kysymykset</a>
 WANAggregation_enable=Ota WAN-aggregaatio käyttöön

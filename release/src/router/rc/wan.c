@@ -1243,6 +1243,21 @@ void restore_wan_ebtables_rules()
 #endif
 }
 
+/* A VLAN parent can also carry LAN traffic with a larger MTU. */
+static int ensure_parent_mtu(int fd, const char *ifname, int minimum)
+{
+	struct ifreq ifr;
+
+	memset(&ifr, 0, sizeof(ifr));
+	strlcpy(ifr.ifr_name, ifname, sizeof(ifr.ifr_name));
+	if (ioctl(fd, SIOCGIFMTU, &ifr) < 0)
+		return -1;
+	if (ifr.ifr_mtu >= minimum)
+		return 0;
+	ifr.ifr_mtu = minimum;
+	return ioctl(fd, SIOCSIFMTU, &ifr);
+}
+
 void
 start_wan_if(int unit)
 {
@@ -1253,6 +1268,10 @@ start_wan_if(int unit)
 	int pppoerelay_unit;
 #endif
 	char wan_ifname[16];
+	const char *verified_ifname = NULL;
+#ifdef GTBE98
+	char vlan_ifname[IFNAMSIZ];
+#endif
 	char tmp[100], prefix[32];
 	char eabuf[32];
 	int wan_proto, s;
@@ -1365,10 +1384,13 @@ start_wan_if(int unit)
 
 #if defined(GTBE98)
 	/* Reconnect must not start PPP/DHCP on an unverified or changed VLAN. */
-	if (unit == WAN_UNIT_FIRST && gtbe98_vlan_requested() &&
-	    gtbe98_vlan_wan_start() != 0) {
-		update_wan_state(prefix, WAN_STATE_STOPPED, WAN_STOPPED_REASON_SYSTEM_ERR);
-		return;
+	if (unit == WAN_UNIT_FIRST && gtbe98_vlan_requested()) {
+		strlcpy(vlan_ifname, nvram_safe_get("wan0_ifname"), sizeof(vlan_ifname));
+		if (gtbe98_vlan_wan_start(vlan_ifname) != 0) {
+			update_wan_state(prefix, WAN_STATE_STOPPED, WAN_STOPPED_REASON_SYSTEM_ERR);
+			return;
+		}
+		verified_ifname = vlan_ifname;
 	}
 #endif
 
@@ -1391,7 +1413,7 @@ start_wan_if(int unit)
 
 	// workaround internal XPHY no Rx issue
 #if defined(GTBE98) || defined(GTBE98_PRO) || defined(GTBE96) || defined(RTBE58U) || defined(TUFBE3600) || defined(RTBE58U_V2) || defined(TUFBE3600_V2) || defined(RTBE55) || defined(GTBE19000) || defined(RTBE92U) || defined(RTBE95U) || defined(RTBE82U) || defined(TUFBE82) || defined(RTBE58U_PRO) || defined(GTBE19000AI) || defined(GTBE96_AI)
-	strlcpy(wan_ifname, nvram_safe_get(strcat_r(prefix, "ifname", tmp)), sizeof(wan_ifname));
+	strlcpy(wan_ifname, verified_ifname ? verified_ifname : nvram_safe_get(strcat_r(prefix, "ifname", tmp)), sizeof(wan_ifname));
 	if (!strcmp(wan_ifname, "vlan4094") || ((get_wans_dualwan() & WANSCAP_LAN) && !strcmp(wan_ifname, "vlan2"))) {
 		nvram_set("freeze_duck", "5");
 		if (!strcmp(wan_ifname, "vlan4094"))
@@ -1778,8 +1800,8 @@ TRACE_PT("3g begin with %s.\n", wan_ifname);
 	if (dualwan_unit__nonusbif(unit)) {
 		convert_wan_nvram(prefix, unit);
 
-		/* make sure the connection exists and is enabled */
-		snprintf(wan_ifname, sizeof(wan_ifname), "%s", nvram_safe_get(strcat_r(prefix, "ifname", tmp)));
+		/* Keep the verified device through DHCP and PPP startup. */
+		strlcpy(wan_ifname, verified_ifname ? verified_ifname : nvram_safe_get(strcat_r(prefix, "ifname", tmp)), sizeof(wan_ifname));
 		if (*wan_ifname == '\0')
 			return;
 
@@ -2093,14 +2115,10 @@ TRACE_PT("3g begin with %s.\n", wan_ifname);
 						/* First set parent device if vlan was configured */
 						strncpy(ifv.device1, wan_ifname, IFNAMSIZ);
 						ifv.cmd = GET_VLAN_REALDEV_NAME_CMD;
-						if (ioctl(s, SIOCGIFVLAN, &ifv) >= 0) {
-							strncpy(ifr.ifr_name, ifv.u.device2, IFNAMSIZ);
-							ifr.ifr_mtu = mtu + 8;
-							if (ioctl(s, SIOCSIFMTU, &ifr)) {
-								perror(wan_ifname);
-								logmessage("start_wan_if()", "Error setting MTU on %s to %d", ifv.u.device2, mtu);
-							}
-						}
+						if (ioctl(s, SIOCGIFVLAN, &ifv) >= 0 &&
+						    ensure_parent_mtu(s, ifv.u.device2, mtu + 8) < 0)
+							logmessage("start_wan_if()", "Cannot ensure MTU of at least %d on %s: %s",
+								mtu + 8, ifv.u.device2, strerror(errno));
 
 						/* Set WAN device */
 						strncpy(ifr.ifr_name, wan_ifname, IFNAMSIZ);
@@ -2117,7 +2135,7 @@ TRACE_PT("3g begin with %s.\n", wan_ifname);
 			/* launch dhcp client and wait for lease forawhile */
 			if (dhcpenable) {
 #if defined(RTCONFIG_AUTO_WANPORT) && !defined(RTCONFIG_BCM_MFG)
-				if(is_auto_wanport_enabled() == 1){
+				if (!verified_ifname && is_auto_wanport_enabled() == 1) {
 					strlcpy(wan_ifname, nvram_safe_get("lan_ifname"), sizeof(wan_ifname));
 
 					dbG("AUTO_WANPORT start PPP's udhcpc: %s, %d\n", wan_ifname, unit);
@@ -2167,7 +2185,7 @@ TRACE_PT("3g begin with %s.\n", wan_ifname);
 			}
 
 #if defined(RTCONFIG_AUTO_WANPORT) && !defined(RTCONFIG_BCM_MFG)
-			if(is_auto_wanport_enabled() == 1){
+			if (!verified_ifname && is_auto_wanport_enabled() == 1) {
 				dbG("AUTO_WANPORT Skip the below PPP procedure (no DHCP): %s, %d\n", wan_ifname, unit);
 				break;
 			}
@@ -2187,11 +2205,7 @@ TRACE_PT("3g begin with %s.\n", wan_ifname);
 #endif	/* RTCONFIG_TCPDUMP && RTCONFIG_SOC_IPQ40XX && RTCONFIG_PSISTLOG */
 
 			/* launch pppoe client daemon */
-			start_pppd(unit);
-
-			/* ppp interface name is referenced from this point
-			 * after pppd start before ip-pre-up it will be empty */
-			snprintf(wan_ifname, sizeof(wan_ifname), "%s", nvram_safe_get(strcat_r(prefix, "pppoe_ifname", tmp)));
+			start_pppd(unit, wan_ifname);
 
 #ifdef RTCONFIG_MULTI_PPP
 #ifdef RTCONFIG_DUALWAN
@@ -2202,11 +2216,15 @@ TRACE_PT("3g begin with %s.\n", wan_ifname);
 					int i = 1;
 					int max_mtppp_unit = nvram_get_int(strcat_r(prefix, "ppp_conn", tmp));
 					for(i = 1; i < max_mtppp_unit; i++) {
-						start_pppd(get_mtppp_wan_unit(unit, i));
+						start_pppd(get_mtppp_wan_unit(unit, i), wan_ifname);
 					}
 				}
 			}
 #endif
+
+			/* ppp interface name is referenced from this point
+			 * after pppd start before ip-pre-up it will be empty */
+			snprintf(wan_ifname, sizeof(wan_ifname), "%s", nvram_safe_get(strcat_r(prefix, "pppoe_ifname", tmp)));
 
 			/* Pretend that the WAN interface is up */
 			if (demand) {
@@ -2277,7 +2295,7 @@ TRACE_PT("3g begin with %s.\n", wan_ifname);
 #endif
 
 #if defined(RTCONFIG_AUTO_WANPORT) && !defined(RTCONFIG_BCM_MFG)
-			if(is_auto_wanport_enabled() == 1){
+			if (!verified_ifname && is_auto_wanport_enabled() == 1) {
 				strlcpy(wan_ifname, nvram_safe_get("lan_ifname"), sizeof(wan_ifname));
 
 				/* Bring up WAN interface */

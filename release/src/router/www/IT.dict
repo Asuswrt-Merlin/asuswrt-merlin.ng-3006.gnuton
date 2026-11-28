@@ -4496,6 +4496,15 @@ wandog_enable2=Enable Ping to Internet
 WANTCPMSSOptionText=Dimensione massima MSS (parte dati segmento TCP)
 WANTCPMSSOptionComm1Text=byte
 WANVLANIDText=VLAN ID
+WANVLAN_priority=Priorità 802.1p
+WANVLAN_unavailable=La VLAN WAN non è disponibile. Se è abilitata, seleziona «No» e fai clic su «Applica» per disabilitarla e riavviare il router.
+WANVLAN_invalid_range=Inserisci un ID VLAN da 3 a 4093 e una priorità da 0 a 7.
+WANVLAN_migrate_iptv=Disabilita prima il profilo ISP e la porta STB in LAN > IPTV. La VLAN dell’ISP non viene trasferita automaticamente. Inseriscila qui.
+WANVLAN_topology=La VLAN WAN richiede una sola WAN selezionata manualmente. Disabilita prima AutoWAN, WAN duale, backup e standby USB, aggregazione WAN e VLAN LAN.
+WANVLAN_iptv_locked=Disabilita 802.1Q in WAN > Connessione ad Internet e riavvia il router prima di modificare le impostazioni IPTV.
+WANVLAN_port_locked=La VLAN WAN richiede una sola WAN selezionata manualmente senza standby USB. Disabilita 802.1Q in WAN > Connessione ad Internet prima di cambiare modalità.
+WANVLAN_help=Configura una sola VLAN Internet sulla porta WAN 10G o LAN/WAN 2.5G selezionata manualmente. Disabilita prima IPTV, AutoWAN, WAN duale, backup e standby USB, aggregazione WAN e VLAN LAN. Lo standby ErP è sospeso finché la VLAN WAN è abilitata. Per sostituire un profilo IPTV manuale, disabilitalo e inserisci qui la relativa VLAN dell’ISP. Le modifiche alla VLAN o alla porta richiedono un riavvio. Per ripristinare il profilo IPTV, disabilita prima la VLAN WAN e riavvia il router.
+WANVLAN_apply_failed=Impossibile applicare le impostazioni perché la verifica della VLAN WAN è fallita. La pagina verrà ricaricata. Controlla le impostazioni e riprova.
 WANAggregation=Aggregazione WAN
 WANAggregation_desc=WAN Aggregation combina due connessioni di rete per aumentare la velocità WAN fino a 2Gbps. Collega le porte #WAN e LAN 4 del router alle porte LAN del modem (assicurati di usare due cavi con le stesse specifiche). <a id="wanAgg_faq" target="_blank" style="color:#FFCC00;text-decoration:underline;">FAQ di WAN Aggregation</a>
 WANAggregation_enable=Abilita WAN Aggregation

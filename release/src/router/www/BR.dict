@@ -4496,6 +4496,15 @@ wandog_enable2=Ativar Ping to Internet
 WANTCPMSSOptionText=Opção TCP MSS
 WANTCPMSSOptionComm1Text=bytes
 WANVLANIDText=ID de VLAN
+WANVLAN_priority=Prioridade 802.1p
+WANVLAN_unavailable=A VLAN WAN está indisponível. Se estiver ativada, selecione «Não» e clique em «Aplicar» para desativá-la e reiniciar o roteador.
+WANVLAN_invalid_range=Insira um ID de VLAN entre 3 e 4093 e uma prioridade entre 0 e 7.
+WANVLAN_migrate_iptv=Desative primeiro o perfil do provedor e a porta STB em LAN > IPTV. A VLAN do provedor não é migrada automaticamente. Insira-a aqui.
+WANVLAN_topology=A VLAN WAN exige uma única WAN selecionada manualmente. Desative primeiro AutoWAN, WAN dupla, backup e espera por USB, agregação WAN e VLANs da LAN.
+WANVLAN_iptv_locked=Desative 802.1Q em WAN > Conexão de internet e reinicie o roteador antes de alterar as configurações de IPTV.
+WANVLAN_port_locked=A VLAN WAN exige uma única WAN selecionada manualmente, sem espera por USB. Desative 802.1Q em WAN > Conexão de internet antes de mudar de modo.
+WANVLAN_help=Configure uma única VLAN de Internet na porta WAN de 10 Gbps ou LAN/WAN de 2,5 Gbps selecionada manualmente. Desative primeiro IPTV, AutoWAN, WAN dupla, backup e espera por USB, agregação WAN e VLANs da LAN. O modo de espera ErP fica suspenso enquanto a VLAN WAN estiver ativa. Para substituir um perfil manual de IPTV, desative-o primeiro e insira aqui a VLAN do provedor. Alterações na VLAN ou na porta exigem reinicialização. Para restaurar o perfil IPTV, desative a VLAN WAN e reinicie o roteador primeiro.
+WANVLAN_apply_failed=Não foi possível aplicar as configurações porque a validação da VLAN WAN falhou. A página será recarregada. Verifique as configurações e tente novamente.
 WANAggregation=Agregação de WAN
 WANAggregation_desc=Agregação WAN combina duas conexões de rede para aumentar sua velocidade até WAN para 2 Gbps. Conecte a porta #WAN do seu roteador e porta LAN 4 a portas LAN do seu modem (garantir que você use dois cabos com a mesma especificação). <a id="wanAgg_faq" target="_blank" style="color:#FFCC00;text-decoration:underline;">FAQ de Agregação WAN</a>
 WANAggregation_enable=Ativar Agregação de WAN

@@ -2,6 +2,7 @@
 /* Execute the actual rc backend with local files and simulated devices. */
 #define _GNU_SOURCE
 #define __RC_H__
+#define RTCONFIG_AMAS
 #define RTCONFIG_USB_WAN_BACKUP
 #include <assert.h>
 #include <errno.h>
@@ -227,7 +228,7 @@ static void reset(int extwan)
 	nvram_set("autowan_enable", "0"); nvram_set("wans_dualwan", "wan none");
 	nvram_set("wans_standby", "0"); nvram_set_int("wans_extwan", extwan);
 	nvram_set("wans_usb_bk", "0"); nvram_set("wans_usb_bk_act", "0");
-	nvram_set("bond_wan", "0"); nvram_set("vlan_enable", "0"); nvram_set("lan_ifname", "br0");
+	nvram_set("vlan_enable", "0"); nvram_set("lan_ifname", "br0");
 	nvram_set("gtbe98_wan_vlan_cap", "1");
 }
 int main(void)
@@ -248,14 +249,17 @@ int main(void)
 	assert(!strstr(nvram_safe_get("lan_ifnames"), "vlan4094"));
 	nvram_set("lan_ifnames", "eth0 eth1 bond0 wl0 wl1 wl2 wl3");
 	assert(gtbe98_vlan_configure() == 0 && !up_commands);
+	assert(nvram_match("eth_ifnames", "eth0") && nvram_match("amas_ethif_type", "32"));
+	assert(nvram_match("eth_priority", "0 1 1") && nvram_match("wired_ifnames", "eth0 eth1 eth2 eth3"));
+	assert(nvram_match("amas_lldp_ifnames", "eth0 eth3") && nvram_match("amas_lldp_iftypes", "32 32"));
 	assert(strstr(nvram_safe_get("lan_ifnames"), "bond0"));
-	assert(gtbe98_vlan_wan_start() == 0 && up_commands == 1);
+	assert(gtbe98_vlan_wan_start(nvram_safe_get("wan0_ifname")) == 0 && up_commands == 1);
 	commands = programming;
-	assert(gtbe98_vlan_wan_start() == 0 && up_commands == 1 && programming == commands);
+	assert(gtbe98_vlan_wan_start(nvram_safe_get("wan0_ifname")) == 0 && up_commands == 1 && programming == commands);
 	gtbe98_vlan_reset(); parent_up = vlan_up = 0; parent_in_lan = 0;
 	assert(gtbe98_vlan_configure() == 0 && programming == commands);
 	parent_in_lan = 1;
-	assert(gtbe98_vlan_wan_start() == 0 && up_commands == 2 && programming == commands);
+	assert(gtbe98_vlan_wan_start(nvram_safe_get("wan0_ifname")) == 0 && up_commands == 2 && programming == commands);
 	nvram_set("wan0_vid", "836"); nvram_set("wans_extwan", "0");
 	assert(gtbe98_vlan_reconfig_ifnames() == 1);
 	assert(strstr(nvram_safe_get("lan_ifnames"), "bond0"));
@@ -267,19 +271,23 @@ int main(void)
 	assert(gtbe98_vlan_configure() == -1 && !programming && !up_commands);
 	reset(1); fail_vlan_map = 1;
 	assert(gtbe98_vlan_configure() == -1 && vlan_creates == 1 && !up_commands);
-	assert(gtbe98_vlan_wan_start() == -1 && !up_commands);
+	assert(gtbe98_vlan_wan_start(nvram_safe_get("wan0_ifname")) == -1 && !up_commands);
 	reset(1); ifindex = 42; strcpy(vlan_name, "vlan835");
 	assert(gtbe98_vlan_configure() == -1 && ifindex == 42 && !vlan_creates && !programming);
 	reset(1); assert(!gtbe98_vlan_configure()); vlan_in_lan = 1;
-	assert(gtbe98_vlan_wan_start() == -1 && !up_commands);
+	assert(gtbe98_vlan_wan_start(nvram_safe_get("wan0_ifname")) == -1 && !up_commands);
+	reset(1); assert(!gtbe98_vlan_configure());
+	nvram_set("wan0_ifname", "eth0");
+	assert(gtbe98_vlan_wan_start(nvram_safe_get("wan0_ifname")) == -1);
+	assert(!up_commands && !vlan_up && nvram_match("gtbe98_wan_vlan_ready", "0"));
 	reset(1); assert(!gtbe98_vlan_configure()); wrong_parent = 1;
-	assert(gtbe98_vlan_wan_start() == -1 && !up_commands);
+	assert(gtbe98_vlan_wan_start(nvram_safe_get("wan0_ifname")) == -1 && !up_commands);
 	reset(0); assert(gtbe98_vlan_reconfig_ifnames() == 1);
 	assert(nvram_match("wan_ifname", "eth0"));
 	assert(!strstr(nvram_safe_get("lan_ifnames"), "eth0"));
-	assert(!gtbe98_vlan_configure() && !gtbe98_vlan_wan_start());
+	assert(!gtbe98_vlan_configure() && !gtbe98_vlan_wan_start(nvram_safe_get("wan0_ifname")));
 	assert(!all_commands && parent_up && vlan_up);
-	nvram_set("wan0_vid", "836"); assert(gtbe98_vlan_wan_start() == -1 && !vlan_up);
+	nvram_set("wan0_vid", "836"); assert(gtbe98_vlan_wan_start(nvram_safe_get("wan0_ifname")) == -1 && !vlan_up);
 	reset(1); nvram_set("switch_wantag", "manual");
 	assert(gtbe98_vlan_configure() == -1 && !programming && !vlan_creates);
 	reset(1); nvram_set("wans_usb_bk", "1");
@@ -297,7 +305,7 @@ int main(void)
 		if (lacp)
 			nvram_set("lan_ifnames", port ? "eth0 eth1 bond0 wl0 wl1 wl2 wl3" : "eth1 bond0 wl0 wl1 wl2 wl3");
 		strcpy(lan_before, nvram_safe_get("lan_ifnames"));
-		assert(!gtbe98_vlan_configure() && !gtbe98_vlan_wan_start());
+		assert(!gtbe98_vlan_configure() && !gtbe98_vlan_wan_start(nvram_safe_get("wan0_ifname")));
 		assert(nvram_match("lan_ifnames", lan_before));
 		assert(nvram_match("gtbe98_wan_vlan_ready", "1"));
 		assert(!!strstr(lan_before, "bond0") == lacp);

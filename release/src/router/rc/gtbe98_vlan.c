@@ -34,7 +34,9 @@ static int load_plan(struct gtbe98_vlan_plan *plan)
 	r.single_wan = r.single_wan && nvram_match("wans_usb_bk", "0") && nvram_match("wans_usb_bk_act", "0");
 #endif
 	r.extwan = !strcmp(extwan, "0") ? 0 : !strcmp(extwan, "1") ? 1 : -1;
+#ifdef RTCONFIG_BONDING_WAN
 	r.wan_aggregation = !nvram_match("bond_wan", "0");
+#endif
 	/* Reject configured multi-LAN VLANs conservatively, including inactive
 	 * definitions. Their ownership is not part of this first implementation.
 	 */
@@ -402,9 +404,19 @@ int gtbe98_vlan_configure(void)
 			goto out;
 		}
 	}
-	/* init_switch() has already run config_lacp() during boot. Publish only
-	 * WAN fields here; rebuilding lan_ifnames would drop its bond0 mapping.
-	 */
+#ifdef RTCONFIG_AMAS
+	/* LAN/WAN1 is now dedicated to the ISP. eth0 is available to AiMesh
+	 * as a 10G LAN port, and the legacy vlan4094 no longer exists. */
+	if (plan.program_switch) {
+		nvram_set("eth_ifnames", "eth0");
+		nvram_set("amas_ethif_type", "32");
+		nvram_set("eth_priority", "0 1 1");
+		nvram_set("wired_ifnames", "eth0 eth1 eth2 eth3");
+		nvram_set("amas_lldp_ifnames", "eth0 eth3");
+		nvram_set("amas_lldp_iftypes", "32 32");
+	}
+#endif
+	/* Preserve the LAN bridge membership already set by config_lacp(). */
 	nvram_set("wan_ifname", plan.ifname);
 	set_wan_phy(plan.ifname);
 	nvram_set("wan0_ifname", plan.ifname);
@@ -420,7 +432,7 @@ out:
 	return ret;
 }
 
-int gtbe98_vlan_wan_start(void)
+int gtbe98_vlan_wan_start(const char *ifname)
 {
 	struct gtbe98_vlan_plan plan, owned;
 	struct vlan_context *c = NULL;
@@ -430,7 +442,8 @@ int gtbe98_vlan_wan_start(void)
 	if (fd < 0)
 		return -1;
 	if (load_plan(&plan) != GTBE98_VLAN_OK || read_owner(&owned, &index) ||
-	    !same_plan(&plan, &owned) || !linux_matches(&plan, index, 0))
+	    !same_plan(&plan, &owned) || strcmp(ifname, plan.ifname) ||
+	    !linux_matches(&plan, index, 0))
 		goto fail;
 	if (plan.program_switch) {
 		c = calloc(1, sizeof(*c));
