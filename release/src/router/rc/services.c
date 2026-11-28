@@ -2447,6 +2447,15 @@ void reload_dnsmasq(void)
 
 int dnsmasq_script_main(int argc, char **argv)
 {
+	const char *action = (argc > 1) ? argv[1] : "";
+	const char *mac    = (argc > 2) ? argv[2] : "";
+	const char *ip     = (argc > 3) ? argv[3] : "";
+	const char *host   = (argc > 4 && argv[4] && *argv[4]) ? argv[4] : "-";
+
+	/* Log DHCP lease events for easy client connection history in syslog */
+	if (!strcmp(action, "add") || !strcmp(action, "old") || !strcmp(action, "del"))
+		logmessage("dhcp-client", "%s mac=%s ip=%s host=%s", action, mac, ip, host);
+
 	// TODO : call function directly
 #if defined(RTCONFIG_TR069) && !defined(RTCONFIG_TR181)
 	tr_lease_main(argc, argv);
